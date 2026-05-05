@@ -88,7 +88,7 @@ class RedSdnEnv(gym.Env):
             print(f"Error enviando orden a Ryu: {e}")
         # ---> ¡NUEVO! Damos tiempo a Mininet para que los paquetes sufran la congestión
         # y a Ryu para que actualice sus estadísticas antes de que la IA mire.
-        time.sleep(0.2)
+        time.sleep(0.1)
 
         # 2. LEER MÉTRICAS REALES DESDE RYU VÍA API REST
         try:
@@ -143,8 +143,8 @@ class RedSdnEnv(gym.Env):
     def _aplicar_congestion_aleatoria(self):
         
         # 1. Limpiamos cualquier regla de atasco anterior en ambas rutas
-        os.system("tc qdisc del dev s1-eth2 root 2>/dev/null")
-        os.system("tc qdisc del dev s1-eth3 root 2>/dev/null")
+        os.system("sudo tc qdisc del dev s1-eth2 root 2>/dev/null")
+        os.system("sudo tc qdisc del dev s1-eth3 root 2>/dev/null")
         
         # 2. Elegimos qué desastre va a ocurrir y en qué ruta
         escenarios = ["normal", "latencia", "perdida", "congestion"]
@@ -161,15 +161,15 @@ class RedSdnEnv(gym.Env):
             
         elif escenario == "latencia":
             # Inyectamos 100ms de retraso
-            os.system(f"tc qdisc add dev {ruta_afectada} root netem delay 100ms")
+            os.system(f"sudo tc qdisc add dev {ruta_afectada} root netem delay 100ms")
             
         elif escenario == "perdida":
             # Destruimos el 10% de los paquetes que pasen por ahí
-            os.system(f"tc qdisc add dev {ruta_afectada} root netem loss 10%")
+            os.system(f"sudo tc qdisc add dev {ruta_afectada} root netem loss 10%")
             
         elif escenario == "congestion":
             # Estrangulamos el cable para que solo pasen 10 Megabits por segundo
-            os.system(f"tc qdisc add dev {ruta_afectada} root tbf rate 10mbit burst 32kbit latency 400ms")
+            os.system(f"sudo tc qdisc add dev {ruta_afectada} root tbf rate 10Mbit burst 32kbit latency 400ms")
 
 # --- Código para probar que el entorno no tiene errores ---
 if __name__ == "__main__":

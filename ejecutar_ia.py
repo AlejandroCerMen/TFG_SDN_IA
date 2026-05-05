@@ -9,7 +9,7 @@ def poner_ia_en_produccion():
 
     print("[+] Cargando el cerebro de la IA (ia_sdn_optimizada.zip)...")
     # Cambia el nombre si tu archivo .zip se llama distinto
-    model = PPO.load("ia_sdn_optimizadaV1") 
+    model = PPO.load("ia_sdn_optimizada") 
 
     print("\n[================================================]")
     print("[🚀] IA ACTIVA EN MODO PRODUCCIÓN. MONITORIZANDO...")

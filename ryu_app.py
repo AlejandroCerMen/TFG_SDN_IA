@@ -91,7 +91,7 @@ class TFG_RyuController(app_manager.RyuApp):
                     pass
 
             # Pausar una décima de segundo
-            hub.sleep(0.1)
+            hub.sleep(0.05)
 
     @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
     def switch_features_handler(self, ev):
