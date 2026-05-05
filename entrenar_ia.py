@@ -1,45 +1,49 @@
-import gymnasium as gym
-from stable_baselines3 import PPO
-from stable_baselines3.common.callbacks import EvalCallback
-from controlador_ia import RedSdnEnv
 import os
+from stable_baselines3 import PPO
+from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
+from controlador_ia import RedSdnEnv
 
-# 1. Crear el entorno
-env = RedSdnEnv()
+# 1. Crear el entorno con normalización automática
+#
+# VecNormalize resuelve el problema de value_loss alto y explained_variance≈0:
+# normaliza las observaciones y las recompensas en tiempo real usando una media
+# y varianza móviles, manteniendo el rango de entradas de la red neuronal en [-1, 1].
+env = DummyVecEnv([lambda: RedSdnEnv()])
+env = VecNormalize(
+    env,
+    norm_obs=True,      # Normaliza el vector de estado
+    norm_reward=True,   # Normaliza las recompensas
+    clip_obs=10.0,      # Limita observaciones a ±10 sigmas para evitar outliers
+    clip_reward=10.0    # Limita recompensas a ±10 sigmas
+)
 
 # 2. Configurar el modelo de IA
 #
-# Ajustes respecto a la versión anterior y por qué:
+# - n_steps=256:      Pasos recogidos antes de cada actualización.
+#                     Con fps≈14 (Session HTTP persistente + sleep=0.05),
+#                     cada ronda tarda ~18s → estadísticas cada ~18 segundos.
+#                     Reducido desde 512 para que el entrenamiento se sienta
+#                     responsivo. 256 sigue siendo suficiente para estimar
+#                     ventajas en un entorno de solo 2 acciones.
 #
-# - n_steps=512: Cuántos pasos recoge el agente antes de cada actualización.
-#   Subir de 2048 (defecto) a 512 acelera las actualizaciones, útil cuando
-#   los episodios son cortos y la red cambia rápido.
+# - batch_size=64:    Divide exactamente n_steps (256/64 = 4 mini-batches).
 #
-# - batch_size=64: Tamaño del mini-batch para el gradiente. Debe dividir
-#   exactamente a n_steps (512 / 64 = 8). Valores más pequeños = más ruido
-#   pero convergencia más rápida en entornos con alta varianza de recompensa.
+# - n_epochs=10:      Reutilizaciones de cada batch de experiencias.
 #
-# - n_epochs=10: Cuántas veces reutiliza cada batch de experiencias.
-#   El valor por defecto es 10; lo dejamos explícito para documentarlo.
+# - learning_rate=3e-4: Tasa estándar para PPO.
 #
-# - learning_rate=3e-4: Tasa de aprendizaje estándar para PPO. Si el
-#   value_loss sigue siendo muy alto tras el entrenamiento, reducir a 1e-4.
+# - ent_coef=0.05:    Mantiene la exploración activa durante el entrenamiento.
 #
-# - ent_coef=0.05: Coeficiente de entropía. Mantiene la exploración activa
-#   para que la IA no se quede atascada en una sola ruta prematuramente.
+# - vf_coef=0.75:     Mayor peso al crítico (red de valor) para estabilizar
+#                     el aprendizaje y reducir el value_loss.
 #
-# - vf_coef=0.75: Coeficiente de la función de valor (crítico). Subir de
-#   0.5 (defecto) a 0.75 le da más importancia a aprender a predecir las
-#   recompensas futuras, lo que reduce el explained_variance ≈ 0 observado.
-#
-# - clip_range=0.2: Límite del recorte de PPO (estándar). Evita
-#   actualizaciones de política demasiado bruscas.
+# - clip_range=0.2:   Recorte PPO estándar; evita actualizaciones bruscas.
 #
 model = PPO(
     "MlpPolicy",
     env,
     verbose=1,
-    n_steps=512,
+    n_steps=256,
     batch_size=64,
     n_epochs=10,
     learning_rate=3e-4,
@@ -53,6 +57,10 @@ model = PPO(
 print("Iniciando entrenamiento...")
 model.learn(total_timesteps=50000)
 
-# 4. Guardar el cerebro de la IA entrenada
+# 4. Guardar el modelo y las estadísticas de normalización
+#    IMPORTANTE: VecNormalize guarda la media y varianza aprendidas.
+#    Sin ia_sdn_normalizer.pkl, el modelo en producción recibiría
+#    observaciones sin normalizar y tomaría decisiones incorrectas.
 model.save("ia_sdn_optimizada")
-print("¡Entrenamiento finalizado y modelo guardado!")
+env.save("ia_sdn_normalizer.pkl")
+print("¡Entrenamiento finalizado! Guardados: ia_sdn_optimizada.zip + ia_sdn_normalizer.pkl")
