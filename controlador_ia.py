@@ -25,32 +25,28 @@ class RedSdnEnv(gym.Env):
         # ---------------------------------------------------------
         # 2. ESPACIO DE ESTADOS (Lo que la IA "ve")
         # ---------------------------------------------------------
-        # Le pasaremos 6 valores: [Latencia_A, Perdida_A, AnchoBanda_A, Latencia_B, Perdida_B, AnchoBanda_B]
-        # Definimos los límites (mínimo y máximo) teóricos de esos valores.
-        # Box significa que es un array de números continuos.
-        
+        # [Latencia_A, Perdida_A, AnchoBanda_A, Latencia_B, Perdida_B, AnchoBanda_B]
         limites_bajos = np.array([
-            0.0,  # Latencia mínima A (ms)
-            0.0,  # Pérdida mínima A (%)
-            0.0,  # Ancho de banda mínimo A (Mbps)
-            0.0,  # Latencia mínima B (ms)
-            0.0,  # Pérdida mínima B (%)
-            0.0   # Ancho de banda mínimo B (Mbps)
+            0.0,    # Latencia mínima A (ms)
+            0.0,    # Pérdida mínima A (%)
+            0.0,    # Ancho de banda mínimo A (Mbps)
+            0.0,    # Latencia mínima B (ms)
+            0.0,    # Pérdida mínima B (%)
+            0.0     # Ancho de banda mínimo B (Mbps)
         ], dtype=np.float32)
 
         limites_altos = np.array([
             1000.0, # Latencia máxima (1 segundo)
             100.0,  # Pérdida máxima (100%)
             1000.0, # Ancho de banda máximo (1 Gbps)
-            1000.0, 
-            100.0,  
-            1000.0  
+            1000.0,
+            100.0,
+            1000.0
         ], dtype=np.float32)
 
         self.observation_space = spaces.Box(low=limites_bajos, high=limites_altos, dtype=np.float32)
         self.pasos_actuales = 0
         self.proximo_cambio = random.randint(30, 80)
-        # Estado inicial vacío
         self.estado_actual = np.zeros(6, dtype=np.float32)
 
     def reset(self, seed=None, options=None):
@@ -59,11 +55,7 @@ class RedSdnEnv(gym.Env):
         Devuelve la red a su estado inicial.
         """
         super().reset(seed=seed)
-        
-        # TODO: Aquí mandaremos un comando a Ryu para resetear las tablas OpenFlow.
-        # Por ahora, simulamos que la red arranca perfecta:
         self.estado_actual = np.array([10.0, 0.0, 100.0, 10.0, 0.0, 100.0], dtype=np.float32)
-        
         info = {}
         return self.estado_actual, info
 
@@ -72,110 +64,126 @@ class RedSdnEnv(gym.Env):
         El corazón de la IA. Se ejecuta cada vez que el agente toma una decisión.
         """
         self.pasos_actuales += 1
-        
+
         # 1. ¿TOCA CAMBIAR EL ESCENARIO DE LA RED?
         if self.pasos_actuales >= self.proximo_cambio:
             self._aplicar_congestion_aleatoria()
-            # Reseteamos el contador y elegimos un nuevo momento aleatorio para el próximo cambio
             self.pasos_actuales = 0
             self.proximo_cambio = random.randint(30, 80)
-        # 1. EJECUTAR LA ACCIÓN
-        #print(f"La IA ha decidido usar la Ruta: {'A' if action == 0 else 'B'}")
+
+        # 2. EJECUTAR LA ACCIÓN
         try:
-            # Enviamos la orden HTTP POST a Ryu
-            requests.post('http://127.0.0.1:8080/ia/rutas', json={"accion": int(action)})
+            requests.post('http://127.0.0.1:8080/ia/rutas', json={"accion": int(action)}, timeout=1)
         except Exception as e:
             print(f"Error enviando orden a Ryu: {e}")
-        # ---> ¡NUEVO! Damos tiempo a Mininet para que los paquetes sufran la congestión
-        # y a Ryu para que actualice sus estadísticas antes de que la IA mire.
+
+        # Esperamos a que el telemetry agent (hub.sleep=0.05s) complete al menos
+        # dos ciclos de lectura antes de consultar las métricas.
         time.sleep(0.1)
 
-        # 2. LEER MÉTRICAS REALES DESDE RYU VÍA API REST
+        # 3. LEER MÉTRICAS REALES DESDE RYU VÍA API REST
         try:
-            respuesta = requests.get('http://127.0.0.1:8080/ia/metricas')
+            respuesta = requests.get('http://127.0.0.1:8080/ia/metricas', timeout=1)
             datos = respuesta.json()
-            
+
             latencia_a = float(datos['latencia_A'])
-            perdida_a = float(datos['perdida_A'])
-            bw_a = float(datos['bw_A'])
-            
+            perdida_a  = float(datos['perdida_A'])
+            bw_a       = float(datos['bw_A'])
+
             latencia_b = float(datos['latencia_B'])
-            perdida_b = float(datos['perdida_B'])
-            bw_b = float(datos['bw_B'])
-            
-            # Actualizar el estado de la IA
-            self.estado_actual = np.array([latencia_a, perdida_a, bw_a, latencia_b, perdida_b, bw_b], dtype=np.float32)
-            
+            perdida_b  = float(datos['perdida_B'])
+            bw_b       = float(datos['bw_B'])
+
+            self.estado_actual = np.array(
+                [latencia_a, perdida_a, bw_a, latencia_b, perdida_b, bw_b],
+                dtype=np.float32
+            )
         except Exception as e:
             print(f"Error conectando con Ryu: {e}")
-            # Si Ryu falla, mantenemos el estado anterior
-            pass 
 
-        # 3. CALCULAR RECOMPENSA
-        latencia_real = self.estado_actual[0] if action == 0 else self.estado_actual[3]
-        
-        latencia_normalizada = self.estado_actual[0] / 100.0 if action == 0 else self.estado_actual[3] / 100.0
-        perdida_normalizada = self.estado_actual[1] / 100.0 if action == 0 else self.estado_actual[4] / 100.0
-        bw_normalizado = self.estado_actual[2] / 1000.0 if action == 0 else self.estado_actual[5] / 1000.0
+        # 4. CALCULAR RECOMPENSA
+        # Extraemos los valores de la ruta elegida y de la alternativa
+        if action == 0:
+            lat_elegida  = self.estado_actual[0]
+            loss_elegida = self.estado_actual[1]
+            bw_elegida   = self.estado_actual[2]
+            lat_otra     = self.estado_actual[3]
+        else:
+            lat_elegida  = self.estado_actual[3]
+            loss_elegida = self.estado_actual[4]
+            bw_elegida   = self.estado_actual[5]
+            lat_otra     = self.estado_actual[0]
 
-        w_bw = 0.4
-        w_lat = 0.3
+        # Componentes normalizados de la recompensa base (rango ~[-1, 1])
+        lat_norm  = lat_elegida  / 100.0
+        loss_norm = loss_elegida / 100.0
+        bw_norm   = bw_elegida   / 1000.0
+
+        w_bw   = 0.4
+        w_lat  = 0.3
         w_loss = 0.3
 
-        # Recompensa base (tu fórmula)
-        recompensa = (w_bw * bw_normalizado) - (w_lat * latencia_normalizada) - (w_loss * perdida_normalizada)
+        recompensa = (w_bw * bw_norm) - (w_lat * lat_norm) - (w_loss * loss_norm)
 
-        # --- ¡EL CASTIGO DE CHOQUE PARA FORZAR EL CAMBIO DE RUTA! ---
-        if latencia_real >= 50.0:
-            # Si se come el atasco, arruinamos la recompensa por completo
-            recompensa -= 100.0  
+        # --- CASTIGO/PREMIO BASADO EN EL CONTEXTO GLOBAL ---
+        # Distinguimos tres situaciones para evitar castigar a la IA cuando
+        # ambas rutas están mal y no tiene opción mejor que elegir.
+        ruta_elegida_mala = lat_elegida >= 50.0
+        ruta_otra_mala    = lat_otra    >= 50.0
+
+        if ruta_elegida_mala and not ruta_otra_mala:
+            # Eligió la ruta congestionada habiendo una buena disponible: castigo fuerte
+            recompensa -= 2.0
+        elif ruta_elegida_mala and ruta_otra_mala:
+            # Ambas rutas están mal: castigo leve, la IA no podía hacer nada mejor
+            recompensa -= 0.2
         else:
-            # Si va por la ruta limpia, le damos un premio jugoso
-            recompensa += 10.0
+            # Eligió la ruta correcta: premio
+            recompensa += 1.0
+
         terminated = False
-        truncated = False
+        truncated  = False
         info = {}
 
-        #print(f"Acción: {'A' if action==0 else 'B'} | Latencia leída A: {self.estado_actual[0]:.1f}ms | Latencia leída B: {self.estado_actual[3]:.1f}ms | Recompensa: {recompensa}")
-
         return self.estado_actual, float(recompensa), terminated, truncated, info
-    
+
     def _aplicar_congestion_aleatoria(self):
-        
-        # 1. Limpiamos cualquier regla de atasco anterior en ambas rutas
+        """
+        Generador de Caos: inyecta escenarios de red aleatorios en una de las dos rutas.
+        Usa 'tc' (Traffic Control de Linux) para manipular el tráfico a nivel de kernel.
+        """
+        # Limpiamos cualquier regla anterior en ambas rutas
         os.system("sudo tc qdisc del dev s1-eth2 root 2>/dev/null")
         os.system("sudo tc qdisc del dev s1-eth3 root 2>/dev/null")
-        
-        # 2. Elegimos qué desastre va a ocurrir y en qué ruta
+
         escenarios = ["normal", "latencia", "perdida", "congestion"]
         escenario = random.choice(escenarios)
-        ruta_afectada = random.choice(["s1-eth2", "s1-eth3"]) # eth2 es Ruta A, eth3 es Ruta B
-        nombre_ruta = "Ruta A" if ruta_afectada == "s1-eth2" else "Ruta B"
+        # eth2 = Ruta A (s1→s2→s4) | eth3 = Ruta B (s1→s3→s4)
+        ruta_afectada = random.choice(["s1-eth2", "s1-eth3"])
+        nombre_ruta   = "Ruta A" if ruta_afectada == "s1-eth2" else "Ruta B"
 
         print(f"\n[!] ---> CAMBIO DE ESCENARIO: {escenario.upper()} en {nombre_ruta} <---")
 
-        # 3. Aplicamos la regla física correspondiente
         if escenario == "normal":
-            # No hacemos nada, la red fluye a máxima velocidad
-            pass
-            
-        elif escenario == "latencia":
-            # Inyectamos 100ms de retraso
-            os.system(f"sudo tc qdisc add dev {ruta_afectada} root netem delay 100ms")
-            
-        elif escenario == "perdida":
-            # Destruimos el 10% de los paquetes que pasen por ahí
-            os.system(f"sudo tc qdisc add dev {ruta_afectada} root netem loss 10%")
-            
-        elif escenario == "congestion":
-            # Estrangulamos el cable para que solo pasen 10 Megabits por segundo
-            os.system(f"sudo tc qdisc add dev {ruta_afectada} root tbf rate 10Mbit burst 32kbit latency 400ms")
+            pass  # Red sin restricciones
 
-# --- Código para probar que el entorno no tiene errores ---
+        elif escenario == "latencia":
+            # Inyecta 100ms de retraso artificial en el enlace
+            os.system(f"sudo tc qdisc add dev {ruta_afectada} root netem delay 100ms")
+
+        elif escenario == "perdida":
+            # Descarta el 10% de los paquetes que pasan por el enlace
+            os.system(f"sudo tc qdisc add dev {ruta_afectada} root netem loss 10%")
+
+        elif escenario == "congestion":
+            # Limita el ancho de banda a 10 Mbit/s (tbf = Token Bucket Filter)
+            os.system(f"sudo tc qdisc add dev {ruta_afectada} root tbf rate 10mbit burst 32kbit latency 400ms")
+
+
+# --- Código para verificar que el entorno cumple el estándar de Gymnasium ---
 if __name__ == "__main__":
     from stable_baselines3.common.env_checker import check_env
-    
+
     env = RedSdnEnv()
-    # Esta función de Stable Baselines comprueba que nuestro código cumple con el estándar de Gym
     check_env(env, warn=True)
     print("\n¡El Entorno Gym es estructuralmente correcto y está listo para entrenar!")

@@ -1,3 +1,12 @@
+# Entorno virtual de Python
 tfg_env/
+
+# Caché de bytecode
 __pycache__/
+
+# Modelos entrenados (pueden pesar varios MB, no pertenecen al repo)
+*.zip
+
+# Logs de TensorBoard
+logs_tfg/
 events.out.tfe*
