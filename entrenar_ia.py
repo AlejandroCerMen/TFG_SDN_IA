@@ -19,23 +19,24 @@ env = VecNormalize(
 
 # 2. Configurar el modelo de IA
 #
-# - n_steps=256:      Pasos recogidos antes de cada actualización.
+# - n_steps=512:      Pasos recogidos antes de cada actualización.
 #                     Con fps≈14 (Session HTTP persistente + sleep=0.05),
-#                     cada ronda tarda ~18s → estadísticas cada ~18 segundos.
-#                     Reducido desde 512 para que el entrenamiento se sienta
-#                     responsivo. 256 sigue siendo suficiente para estimar
-#                     ventajas en un entorno de solo 2 acciones.
+#                     cada ronda tarda ~36s → estadísticas cada ~36 segundos.
+#                     Aumentado desde 256 porque ahora tenemos 4 acciones
+#                     (antes eran 2) y 18 dimensiones de estado (antes 6).
+#                     Más experiencia = mejor estimación de ventajas.
 #
-# - batch_size=64:    Divide exactamente n_steps (256/64 = 4 mini-batches).
+# - batch_size=64:    Divide exactamente n_steps (512/64 = 8 mini-batches).
 #
 # - n_epochs=10:      Reutilizaciones de cada batch de experiencias.
 #
 # - learning_rate=3e-4: Tasa estándar para PPO.
 #
-# - ent_coef=0.05:    Mantiene la exploración activa durante el entrenamiento.
+# - ent_coef=0.05:    Mantiene la exploración activa durante el entrenamiento
+#                     (importante con 4 acciones para explorar todas).
 #
 # - vf_coef=0.75:     Mayor peso al crítico (red de valor) para estabilizar
-#                     el aprendizaje y reducir el value_loss.
+#                     el aprendizaje en un espacio de estados más grande (18 dims).
 #
 # - clip_range=0.2:   Recorte PPO estándar; evita actualizaciones bruscas.
 #
@@ -43,7 +44,7 @@ model = PPO(
     "MlpPolicy",
     env,
     verbose=1,
-    n_steps=256,
+    n_steps=512,
     batch_size=64,
     n_epochs=10,
     learning_rate=3e-4,
@@ -55,7 +56,8 @@ model = PPO(
 
 # 3. Lanzar el entrenamiento
 print("Iniciando entrenamiento...")
-model.learn(total_timesteps=50000)
+print("Topología: Spine-Leaf 3Leaf+2Spine, 4 rutas dinámicas, 18D estado")
+model.learn(total_timesteps=100000)
 
 # 4. Guardar el modelo y las estadísticas de normalización
 #    IMPORTANTE: VecNormalize guarda la media y varianza aprendidas.

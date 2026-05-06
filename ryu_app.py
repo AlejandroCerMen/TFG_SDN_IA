@@ -30,12 +30,12 @@ class TFG_RyuController(app_manager.RyuApp):
         
         # Valores iniciales (sin congestión)
         self.metricas_red = {
-            'latencia_A': 0.1, 
-            'perdida_A': 0.0,
-            'bw_A': 1000.0,
-            'latencia_B': 0.1,
-            'perdida_B': 0.0,
-            'bw_B': 1000.0
+            'latencia_1': 0.1, 'perdida_1': 0.0, 'bw_1': 1000.0,
+            'latencia_2': 0.1, 'perdida_2': 0.0, 'bw_2': 1000.0,
+            'latencia_3': 0.1, 'perdida_3': 0.0, 'bw_3': 1000.0,
+            'latencia_4': 0.1, 'perdida_4': 0.0, 'bw_4': 1000.0,
+            'latencia_5': 0.1, 'perdida_5': 0.0, 'bw_5': 1000.0,
+            'latencia_6': 0.1, 'perdida_6': 0.0, 'bw_6': 1000.0,
         }
 
         # Mapeos para topología dinámica
@@ -85,8 +85,12 @@ class TFG_RyuController(app_manager.RyuApp):
         
         while True:
             rutas = {
-                's1-eth2': ('latencia_A', 'perdida_A', 'bw_A'),
-                's1-eth3': ('latencia_B', 'perdida_B', 'bw_B')
+                's3-eth3': ('latencia_1', 'perdida_1', 'bw_1'),
+                's3-eth4': ('latencia_2', 'perdida_2', 'bw_2'),
+                's4-eth3': ('latencia_3', 'perdida_3', 'bw_3'),
+                's4-eth4': ('latencia_4', 'perdida_4', 'bw_4'),
+                's5-eth3': ('latencia_5', 'perdida_5', 'bw_5'),
+                's5-eth4': ('latencia_6', 'perdida_6', 'bw_6')
             }
 
             for interfaz, metricas in rutas.items():
@@ -293,33 +297,44 @@ class IA_API_Controller(ControllerBase):
         # SOLUCIÓN: Transformamos el string JSON a bytes con encode('utf-8')
         return Response(content_type='application/json', body=body.encode('utf-8'))
 
+    @route('ia_api_ruta_dinamica', '/ia/ruta_dinamica', methods=['POST'])
+    def set_ruta_dinamica(self, req, **kwargs):
+        """
+        Recibe la acción elegida por la IA e instala la ruta dinámica para controlar
+        el flujo TCP pesado de h1 (10.0.0.1) a h4 (10.0.0.4).
+        - Acción 0: ruta por Spine 1 [3, 1, 4]
+        - Acción 1: ruta por Spine 2 [3, 2, 4]
+        """
+        try:
+            datos = req.json if req.body else {}
+            accion = int(datos.get('accion', 0))
+
+            rutas_accion = {
+                0: {'dpid_path': [3, 1, 4]},
+                1: {'dpid_path': [3, 2, 4]},
+            }
+            ruta = rutas_accion.get(accion, rutas_accion[0])
+
+            ip_src = '10.0.0.1'
+            ip_dst = '10.0.0.4'
+            self.ryu_app.instalar_ruta_dinamica(ruta['dpid_path'], ip_src, ip_dst)
+
+            respuesta_ok = json.dumps({"status": "ok"})
+            return Response(content_type='application/json', body=respuesta_ok.encode('utf-8'))
+
+        except Exception as e:
+            respuesta_error = json.dumps({"error": str(e)})
+            return Response(status=500, body=respuesta_error.encode('utf-8'))
+
     @route('ia_api_rutas', '/ia/rutas', methods=['POST'])
     def set_ruta(self, req, **kwargs):
         """
-        Recibe la acción elegida por la IA (0 o 1) vía HTTP POST.
-        Instala la ruta dinámica correspondiente.
+        Endpoint legacy para compatibilidad, redirige la acción a la ruta dinámica.
         """
         try:
-            # Leemos el JSON que nos manda la IA
             datos = req.json if req.body else {}
             accion = int(datos.get('accion', 0))
-            
-            # Definir rutas basadas en acción (ejemplo: Ruta A [3,1,4], Ruta B [3,2,4])
-            if accion == 0:
-                dpid_path = [3, 1, 4]  # Leaf3 -> Spine1 -> Leaf4
-            else:
-                dpid_path = [3, 2, 4]  # Leaf3 -> Spine2 -> Leaf4
-            
-            ip_src = '10.0.0.1'  # h1
-            ip_dst = '10.0.0.2'  # h2
-            
-            # Avisamos al controlador principal para que instale la ruta dinámica
-            self.ryu_app.instalar_ruta_dinamica(dpid_path, ip_src, ip_dst)
-            
-            respuesta_ok = json.dumps({"status": "ok"})
-            # SOLUCIÓN: Encode a utf-8
-            return Response(content_type='application/json', body=respuesta_ok.encode('utf-8'))
-            
+            return self.set_ruta_dinamica(req, **kwargs)
         except Exception as e:
             respuesta_error = json.dumps({"error": str(e)})
             return Response(status=500, body=respuesta_error.encode('utf-8'))

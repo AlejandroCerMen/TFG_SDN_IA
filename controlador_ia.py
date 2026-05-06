@@ -25,12 +25,14 @@ class RedSdnEnv(gym.Env):
         self.proximo_cambio = random.randint(30, 80)
         self.estado_actual = np.zeros(18, dtype=np.float32)
 
-        # Mapas de ruta para calcular la recompensa por acción
+        # Mapas de ruta para calcular la recompensa por acción.
+        # Las métricas se basan en 6 enlaces Spine-Leaf:
+        # 0 = s3->s1, 1 = s3->s2, 2 = s4->s1, 3 = s4->s2, 4 = s5->s1, 5 = s5->s2.
         self.ruta_enlaces = {
-            0: [0, 1, 2],
-            1: [3, 4, 5],
-            2: [0, 3, 4],
-            3: [1, 2, 5],
+            0: [0, 2],  # h1->h4 via s3-s1 and s4-s1
+            1: [1, 3],  # h1->h4 via s3-s2 and s4-s2
+            2: [0, 4],  # h1->h6 via s3-s1 and s5-s1
+            3: [1, 5],  # h1->h6 via s3-s2 and s5-s2
         }
 
         # Sesión HTTP persistente: reutiliza la conexión TCP entre peticiones,
@@ -117,14 +119,18 @@ class RedSdnEnv(gym.Env):
         Generador de Caos: inyecta escenarios de red usando tc (Traffic Control de Linux).
         Cubre los 4 escenarios: normal, latencia, pérdida y congestión.
         """
-        os.system("sudo tc qdisc del dev s1-eth2 root 2>/dev/null")
-        os.system("sudo tc qdisc del dev s1-eth3 root 2>/dev/null")
+        enlaces = [
+            "s3-eth3", "s3-eth4",
+            "s4-eth3", "s4-eth4",
+            "s5-eth3", "s5-eth4"
+        ]
+        for iface in enlaces:
+            os.system(f"sudo tc qdisc del dev {iface} root 2>/dev/null")
 
-        escenario     = random.choice(["normal", "latencia", "perdida", "congestion"])
-        ruta_afectada = random.choice(["s1-eth2", "s1-eth3"])
-        nombre_ruta   = "Ruta A" if ruta_afectada == "s1-eth2" else "Ruta B"
+        escenario = random.choice(["normal", "latencia", "perdida", "congestion"])
+        ruta_afectada = random.choice(enlaces)
 
-        print(f"\n[!] ---> CAMBIO DE ESCENARIO: {escenario.upper()} en {nombre_ruta} <---")
+        print(f"\n[!] ---> CAMBIO DE ESCENARIO: {escenario.upper()} en {ruta_afectada} <---")
 
         if escenario == "latencia":
             os.system(f"sudo tc qdisc add dev {ruta_afectada} root netem delay 100ms")
