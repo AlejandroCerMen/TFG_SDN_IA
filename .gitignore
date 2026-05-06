@@ -6,6 +6,7 @@ __pycache__/
 
 # Modelos entrenados (pueden pesar varios MB, no pertenecen al repo)
 *.zip
+*.pkl
 
 # Logs de TensorBoard
 logs_tfg/

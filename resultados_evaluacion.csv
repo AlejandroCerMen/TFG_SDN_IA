@@ -1,0 +1,1001 @@
+politica,paso,accion,escenario,latencia,perdida,bw,recompensa
+IA (PPO),1,1,normal,0.2,0.0,964.3,1.3851200000000001
+IA (PPO),2,1,normal,0.4,0.0,999.0,1.3984
+IA (PPO),3,1,normal,0.5,0.0,999.8,1.39842
+IA (PPO),4,1,normal,0.5,0.0,998.3,1.39782
+IA (PPO),5,1,normal,0.3,0.0,966.5,1.3857
+IA (PPO),6,1,normal,0.3,0.0,995.7,1.39738
+IA (PPO),7,1,normal,0.4,0.0,975.2,1.3888800000000001
+IA (PPO),8,1,normal,0.4,0.0,991.8,1.39552
+IA (PPO),9,1,normal,0.1,0.0,973.7,1.38918
+IA (PPO),10,1,normal,0.2,0.0,975.6,1.38964
+IA (PPO),11,1,normal,0.4,0.0,970.8,1.38712
+IA (PPO),12,1,normal,0.3,0.0,956.5,1.3817
+IA (PPO),13,1,normal,0.2,0.0,996.4,1.39796
+IA (PPO),14,1,normal,0.4,0.0,965.9,1.38516
+IA (PPO),15,1,normal,0.3,0.0,997.6,1.39814
+IA (PPO),16,1,normal,0.3,0.0,967.0,1.3859
+IA (PPO),17,1,normal,0.3,0.0,996.0,1.3975
+IA (PPO),18,1,normal,0.3,0.0,987.9,1.39426
+IA (PPO),19,1,normal,0.1,0.0,980.8,1.39202
+IA (PPO),20,1,normal,0.2,0.0,951.3,1.37992
+IA (PPO),21,1,normal,0.2,0.0,950.4,1.3795600000000001
+IA (PPO),22,1,normal,0.3,0.0,954.8,1.38102
+IA (PPO),23,1,normal,0.3,0.0,953.5,1.3805
+IA (PPO),24,1,normal,0.2,0.0,993.5,1.3968
+IA (PPO),25,1,normal,0.4,0.0,970.9,1.3871600000000002
+IA (PPO),26,1,normal,0.2,0.0,986.0,1.3938000000000001
+IA (PPO),27,1,normal,0.2,0.0,979.2,1.39108
+IA (PPO),28,1,normal,0.4,0.0,966.6,1.38544
+IA (PPO),29,1,normal,0.1,0.0,956.6,1.3823400000000001
+IA (PPO),30,1,normal,0.5,0.0,966.6,1.38514
+IA (PPO),31,1,normal,0.5,0.0,998.7,1.39798
+IA (PPO),32,1,normal,0.2,0.0,995.7,1.39768
+IA (PPO),33,1,normal,0.4,0.0,995.1,1.39684
+IA (PPO),34,1,normal,0.5,0.0,997.3,1.3974199999999999
+IA (PPO),35,1,normal,0.2,0.0,967.0,1.3862
+IA (PPO),36,1,normal,0.1,0.0,988.1,1.39494
+IA (PPO),37,1,normal,0.1,0.0,969.4,1.38746
+IA (PPO),38,1,normal,0.3,0.0,971.4,1.38766
+IA (PPO),39,1,normal,0.4,0.0,988.7,1.39428
+IA (PPO),40,1,normal,0.3,0.0,990.1,1.39514
+IA (PPO),41,1,normal,0.3,0.0,962.3,1.38402
+IA (PPO),42,1,normal,0.4,0.0,956.5,1.3814
+IA (PPO),43,1,normal,0.2,0.0,967.1,1.38624
+IA (PPO),44,1,normal,0.2,0.0,968.2,1.3866800000000001
+IA (PPO),45,1,normal,0.2,0.0,959.4,1.38316
+IA (PPO),46,1,normal,0.2,0.0,980.4,1.3915600000000001
+IA (PPO),47,1,normal,0.1,0.0,983.8,1.39322
+IA (PPO),48,1,normal,0.2,0.0,992.3,1.39632
+IA (PPO),49,1,normal,0.4,0.0,977.7,1.38988
+IA (PPO),50,1,normal,0.2,0.0,962.5,1.3844
+IA (PPO),51,1,normal,0.2,0.0,959.5,1.3832
+IA (PPO),52,1,normal,0.3,0.0,979.9,1.39106
+IA (PPO),53,1,normal,0.5,0.0,972.7,1.38758
+IA (PPO),54,1,congestion_3,0.3,0.0,9.9,1.00306
+IA (PPO),55,1,congestion_3,0.4,0.0,9.5,1.0026
+IA (PPO),56,1,congestion_3,0.3,0.0,9.4,1.00286
+IA (PPO),57,1,congestion_3,0.1,0.0,9.9,1.00366
+IA (PPO),58,1,congestion_3,0.4,0.0,9.3,1.00252
+IA (PPO),59,1,congestion_3,0.3,0.0,9.5,1.0029
+IA (PPO),60,1,congestion_3,0.4,0.0,9.8,1.00272
+IA (PPO),61,1,congestion_3,0.3,0.0,9.8,1.00302
+IA (PPO),62,1,congestion_3,0.3,0.0,9.4,1.00286
+IA (PPO),63,1,congestion_3,0.3,0.0,9.5,1.0029
+IA (PPO),64,1,congestion_3,0.3,0.0,9.2,1.00278
+IA (PPO),65,1,congestion_3,0.4,0.0,9.2,1.00248
+IA (PPO),66,1,congestion_3,0.5,0.0,9.5,1.0023
+IA (PPO),67,1,congestion_3,0.5,0.0,9.8,1.00242
+IA (PPO),68,1,congestion_3,0.3,0.0,9.9,1.00306
+IA (PPO),69,1,congestion_3,0.2,0.0,9.3,1.00312
+IA (PPO),70,1,congestion_3,0.4,0.0,9.6,1.00264
+IA (PPO),71,1,congestion_3,0.2,0.0,9.8,1.00332
+IA (PPO),72,1,congestion_3,0.2,0.0,9.5,1.0032
+IA (PPO),73,1,congestion_3,0.5,0.0,9.5,1.0023
+IA (PPO),74,1,congestion_3,0.5,0.0,9.9,1.00246
+IA (PPO),75,1,congestion_3,0.4,0.0,9.4,1.00256
+IA (PPO),76,1,congestion_3,0.4,0.0,9.4,1.00256
+IA (PPO),77,1,congestion_3,0.5,0.0,9.1,1.00214
+IA (PPO),78,1,congestion_3,0.3,0.0,9.0,1.0027
+IA (PPO),79,1,congestion_3,0.1,0.0,9.8,1.00362
+IA (PPO),80,1,congestion_3,0.2,0.0,9.9,1.00336
+IA (PPO),81,1,congestion_3,0.3,0.0,9.1,1.00274
+IA (PPO),82,1,congestion_3,0.2,0.0,9.7,1.00328
+IA (PPO),83,1,congestion_3,0.4,0.0,9.4,1.00256
+IA (PPO),84,1,congestion_3,0.1,0.0,9.3,1.00342
+IA (PPO),85,1,congestion_3,0.4,0.0,9.4,1.00256
+IA (PPO),86,1,congestion_3,0.3,0.0,9.6,1.00294
+IA (PPO),87,1,congestion_3,0.4,0.0,9.8,1.00272
+IA (PPO),88,1,congestion_3,0.1,0.0,9.3,1.00342
+IA (PPO),89,1,congestion_3,0.4,0.0,9.8,1.00272
+IA (PPO),90,1,congestion_3,0.2,0.0,9.9,1.00336
+IA (PPO),91,1,congestion_3,0.4,0.0,9.8,1.00272
+IA (PPO),92,1,congestion_3,0.4,0.0,9.8,1.00272
+IA (PPO),93,1,congestion_3,0.4,0.0,9.7,1.00268
+IA (PPO),94,1,congestion_3,0.3,0.0,9.7,1.00298
+IA (PPO),95,1,congestion_3,0.4,0.0,9.9,1.00276
+IA (PPO),96,1,congestion_3,0.4,0.0,9.1,1.00244
+IA (PPO),97,1,congestion_3,0.2,0.0,9.2,1.00308
+IA (PPO),98,1,congestion_3,0.3,0.0,9.5,1.0029
+IA (PPO),99,1,congestion_3,0.2,0.0,9.7,1.00328
+IA (PPO),100,1,congestion_3,0.4,0.0,9.6,1.00264
+IA (PPO),101,1,congestion_3,0.3,0.0,9.6,1.00294
+IA (PPO),102,1,congestion_3,0.4,0.0,9.1,1.00244
+IA (PPO),103,1,congestion_3,0.5,0.0,9.5,1.0023
+IA (PPO),104,1,congestion_3,0.1,0.0,9.4,1.00346
+IA (PPO),105,1,congestion_3,0.3,0.0,9.2,1.00278
+IA (PPO),106,1,congestion_3,0.4,0.0,9.1,1.00244
+IA (PPO),107,1,congestion_3,0.2,0.0,9.4,1.00316
+IA (PPO),108,1,congestion_3,0.5,0.0,9.4,1.00226
+IA (PPO),109,1,congestion_3,0.1,0.0,9.9,1.00366
+IA (PPO),110,1,congestion_3,0.2,0.0,9.6,1.00324
+IA (PPO),111,1,congestion_3,0.4,0.0,9.7,1.00268
+IA (PPO),112,1,congestion_3,0.3,0.0,9.7,1.00298
+IA (PPO),113,1,latencia_2,0.2,0.0,962.7,1.38448
+IA (PPO),114,1,latencia_2,0.4,0.0,958.2,1.38208
+IA (PPO),115,1,latencia_2,0.3,0.0,966.9,1.38586
+IA (PPO),116,1,latencia_2,0.3,0.0,983.9,1.39266
+IA (PPO),117,1,latencia_2,0.3,0.0,961.0,1.3835
+IA (PPO),118,1,latencia_2,0.4,0.0,976.9,1.38956
+IA (PPO),119,1,latencia_2,0.3,0.0,979.6,1.39094
+IA (PPO),120,1,latencia_2,0.2,0.0,977.8,1.39052
+IA (PPO),121,1,latencia_2,0.3,0.0,958.0,1.3823
+IA (PPO),122,1,latencia_2,0.1,0.0,994.8,1.3976199999999999
+IA (PPO),123,1,latencia_2,0.5,0.0,969.3,1.38622
+IA (PPO),124,1,latencia_2,0.4,0.0,991.1,1.39524
+IA (PPO),125,1,latencia_2,0.3,0.0,974.2,1.3887800000000001
+IA (PPO),126,1,latencia_2,0.1,0.0,974.2,1.38938
+IA (PPO),127,1,latencia_2,0.3,0.0,981.9,1.3918599999999999
+IA (PPO),128,1,latencia_2,0.2,0.0,996.9,1.39816
+IA (PPO),129,1,latencia_2,0.2,0.0,962.2,1.38428
+IA (PPO),130,1,latencia_2,0.2,0.0,994.6,1.39724
+IA (PPO),131,1,latencia_2,0.3,0.0,999.5,1.3989
+IA (PPO),132,1,latencia_2,0.1,0.0,989.0,1.3953
+IA (PPO),133,1,latencia_2,0.4,0.0,971.5,1.3874
+IA (PPO),134,1,latencia_2,0.2,0.0,963.4,1.38476
+IA (PPO),135,1,latencia_2,0.3,0.0,995.9,1.39746
+IA (PPO),136,1,latencia_2,0.4,0.0,968.4,1.38616
+IA (PPO),137,1,latencia_2,0.4,0.0,981.4,1.3913600000000002
+IA (PPO),138,1,latencia_2,0.2,0.0,950.5,1.3796
+IA (PPO),139,1,latencia_2,0.3,0.0,972.0,1.3879000000000001
+IA (PPO),140,1,latencia_2,0.3,0.0,993.6,1.3965400000000001
+IA (PPO),141,1,latencia_2,0.4,0.0,999.9,1.39876
+IA (PPO),142,1,latencia_2,0.2,0.0,952.4,1.38036
+IA (PPO),143,1,latencia_2,0.4,0.0,959.8,1.38272
+IA (PPO),144,1,latencia_2,0.3,0.0,965.7,1.38538
+IA (PPO),145,1,normal_2,0.3,0.0,958.7,1.38258
+IA (PPO),146,1,normal_2,0.2,0.0,971.7,1.38808
+IA (PPO),147,1,normal_2,0.2,0.0,989.5,1.3952
+IA (PPO),148,1,normal_2,0.2,0.0,976.9,1.39016
+IA (PPO),149,1,normal_2,0.1,0.0,958.9,1.38326
+IA (PPO),150,1,normal_2,0.1,0.0,954.4,1.38146
+IA (PPO),151,1,normal_2,0.3,0.0,957.1,1.38194
+IA (PPO),152,1,normal_2,0.2,0.0,968.3,1.38672
+IA (PPO),153,1,normal_2,0.3,0.0,982.4,1.39206
+IA (PPO),154,1,normal_2,0.2,0.0,968.0,1.3866
+IA (PPO),155,1,normal_2,0.4,0.0,983.8,1.39232
+IA (PPO),156,1,normal_2,0.4,0.0,1000.0,1.3988
+IA (PPO),157,1,normal_2,0.4,0.0,990.4,1.39496
+IA (PPO),158,1,normal_2,0.4,0.0,954.0,1.3804
+IA (PPO),159,1,normal_2,0.5,0.0,958.9,1.38206
+IA (PPO),160,1,normal_2,0.3,0.0,972.5,1.3881000000000001
+IA (PPO),161,1,normal_2,0.4,0.0,982.5,1.3918
+IA (PPO),162,1,normal_2,0.4,0.0,994.5,1.3966
+IA (PPO),163,1,normal_2,0.5,0.0,979.0,1.3901
+IA (PPO),164,1,normal_2,0.3,0.0,972.3,1.38802
+IA (PPO),165,1,normal_2,0.2,0.0,995.4,1.39756
+IA (PPO),166,1,normal_2,0.5,0.0,994.4,1.39626
+IA (PPO),167,1,normal_2,0.5,0.0,967.1,1.38534
+IA (PPO),168,1,normal_2,0.2,0.0,968.9,1.38696
+IA (PPO),169,1,normal_2,0.3,0.0,983.5,1.3925
+IA (PPO),170,1,normal_2,0.4,0.0,991.0,1.3952
+IA (PPO),171,1,normal_2,0.4,0.0,980.1,1.39084
+IA (PPO),172,1,normal_2,0.3,0.0,966.1,1.38554
+IA (PPO),173,1,normal_2,0.1,0.0,961.0,1.3841
+IA (PPO),174,1,normal_2,0.4,0.0,970.4,1.38696
+IA (PPO),175,1,normal_2,0.3,0.0,996.9,1.39786
+IA (PPO),176,1,normal_2,0.4,0.0,959.9,1.38276
+IA (PPO),177,1,normal_2,0.2,0.0,968.8,1.38692
+IA (PPO),178,1,normal_2,0.4,0.0,989.4,1.39456
+IA (PPO),179,1,normal_2,0.4,0.0,992.1,1.39564
+IA (PPO),180,1,normal_2,0.3,0.0,950.7,1.37938
+IA (PPO),181,1,normal_2,0.3,0.0,967.9,1.38626
+IA (PPO),182,1,normal_2,0.4,0.0,954.3,1.38052
+IA (PPO),183,1,normal_2,0.4,0.0,978.9,1.39036
+IA (PPO),184,1,normal_2,0.4,0.0,950.7,1.37908
+IA (PPO),185,1,normal_2,0.3,0.0,959.2,1.3827800000000001
+IA (PPO),186,1,normal_2,0.5,0.0,986.1,1.39294
+IA (PPO),187,1,normal_2,0.2,0.0,980.0,1.3914
+IA (PPO),188,1,normal_2,0.2,0.0,984.8,1.3933200000000001
+IA (PPO),189,1,normal_2,0.3,0.0,981.1,1.39154
+IA (PPO),190,1,normal_2,0.5,0.0,959.2,1.38218
+IA (PPO),191,1,normal_2,0.5,0.0,959.3,1.38222
+IA (PPO),192,1,normal_2,0.4,0.0,976.4,1.38936
+IA (PPO),193,1,congestion_3,0.4,0.0,9.9,1.00276
+IA (PPO),194,1,congestion_3,0.5,0.0,9.2,1.00218
+IA (PPO),195,1,congestion_3,0.5,0.0,9.7,1.00238
+IA (PPO),196,1,congestion_3,0.5,0.0,9.5,1.0023
+IA (PPO),197,1,congestion_3,0.3,0.0,9.1,1.00274
+IA (PPO),198,1,congestion_3,0.4,0.0,9.4,1.00256
+IA (PPO),199,1,congestion_3,0.3,0.0,9.3,1.00282
+IA (PPO),200,1,congestion_3,0.1,0.0,9.3,1.00342
+Mejor latencia,1,0,normal,0.2,0.0,998.6,1.39884
+Mejor latencia,2,0,normal,0.3,0.0,976.1,1.38954
+Mejor latencia,3,1,normal,0.3,0.0,964.2,1.3847800000000001
+Mejor latencia,4,0,normal,0.4,0.0,998.5,1.3982
+Mejor latencia,5,0,normal,0.5,0.0,966.5,1.3851
+Mejor latencia,6,1,normal,0.1,0.0,998.2,1.39898
+Mejor latencia,7,1,normal,0.5,0.0,997.7,1.39758
+Mejor latencia,8,0,normal,0.2,0.0,985.3,1.39352
+Mejor latencia,9,0,normal,0.2,0.0,970.6,1.38764
+Mejor latencia,10,0,normal,0.5,0.0,959.2,1.38218
+Mejor latencia,11,1,normal,0.4,0.0,969.3,1.38652
+Mejor latencia,12,0,normal,0.2,0.0,957.1,1.38224
+Mejor latencia,13,0,normal,0.4,0.0,957.0,1.3816000000000002
+Mejor latencia,14,1,normal,0.4,0.0,999.8,1.39872
+Mejor latencia,15,0,normal,0.3,0.0,992.4,1.39606
+Mejor latencia,16,1,normal,0.2,0.0,996.2,1.39788
+Mejor latencia,17,0,normal,0.4,0.0,950.6,1.37904
+Mejor latencia,18,0,normal,0.1,0.0,960.8,1.38402
+Mejor latencia,19,0,normal,0.4,0.0,957.1,1.38164
+Mejor latencia,20,1,normal,0.3,0.0,963.5,1.3845
+Mejor latencia,21,1,normal,0.3,0.0,953.8,1.38062
+Mejor latencia,22,0,normal,0.3,0.0,999.2,1.3987800000000001
+Mejor latencia,23,1,normal,0.3,0.0,983.6,1.3925400000000001
+Mejor latencia,24,1,normal,0.5,0.0,967.7,1.38558
+Mejor latencia,25,0,normal,0.3,0.0,963.4,1.38446
+Mejor latencia,26,0,normal,0.2,0.0,998.6,1.39884
+Mejor latencia,27,1,normal,0.5,0.0,997.9,1.3976600000000001
+Mejor latencia,28,0,normal,0.2,0.0,982.0,1.3922
+Mejor latencia,29,0,normal,0.4,0.0,977.2,1.38968
+Mejor latencia,30,1,normal,0.2,0.0,974.8,1.38932
+Mejor latencia,31,0,normal,0.3,0.0,985.0,1.3931
+Mejor latencia,32,0,normal,0.5,0.0,972.6,1.38754
+Mejor latencia,33,1,normal,0.2,0.0,971.5,1.388
+Mejor latencia,34,0,normal,0.2,0.0,954.0,1.381
+Mejor latencia,35,0,normal,0.5,0.0,971.5,1.3871
+Mejor latencia,36,1,normal,0.3,0.0,995.6,1.39734
+Mejor latencia,37,0,normal,0.3,0.0,952.1,1.37994
+Mejor latencia,38,1,normal,0.4,0.0,953.4,1.38016
+Mejor latencia,39,0,normal,0.4,0.0,971.7,1.38748
+Mejor latencia,40,0,normal_2,0.4,0.0,994.2,1.3964800000000002
+Mejor latencia,41,0,normal_2,0.3,0.0,991.1,1.39554
+Mejor latencia,42,0,normal_2,0.4,0.0,995.0,1.3968
+Mejor latencia,43,1,normal_2,0.2,0.0,991.6,1.3960400000000002
+Mejor latencia,44,0,normal_2,0.5,0.0,998.0,1.3977
+Mejor latencia,45,1,normal_2,0.5,0.0,962.8,1.38362
+Mejor latencia,46,0,normal_2,0.3,0.0,957.3,1.38202
+Mejor latencia,47,0,normal_2,0.4,0.0,968.6,1.3862400000000001
+Mejor latencia,48,1,normal_2,0.2,0.0,983.1,1.39264
+Mejor latencia,49,1,normal_2,0.4,0.0,998.8,1.39832
+Mejor latencia,50,0,normal_2,0.3,0.0,977.7,1.39018
+Mejor latencia,51,0,normal_2,0.3,0.0,981.6,1.39174
+Mejor latencia,52,1,normal_2,0.2,0.0,996.8,1.39812
+Mejor latencia,53,0,normal_2,0.4,0.0,990.0,1.3948
+Mejor latencia,54,1,normal_2,0.1,0.0,982.8,1.39282
+Mejor latencia,55,1,normal_2,0.4,0.0,988.8,1.39432
+Mejor latencia,56,0,normal_2,0.2,0.0,983.3,1.39272
+Mejor latencia,57,0,normal_2,0.4,0.0,990.0,1.3948
+Mejor latencia,58,0,normal_2,0.5,0.0,951.7,1.37918
+Mejor latencia,59,1,normal_2,0.3,0.0,956.9,1.38186
+Mejor latencia,60,0,normal_2,0.4,0.0,957.4,1.38176
+Mejor latencia,61,1,normal_2,0.1,0.0,985.9,1.39406
+Mejor latencia,62,1,normal_2,0.5,0.0,958.9,1.38206
+Mejor latencia,63,0,normal_2,0.5,0.0,974.9,1.38846
+Mejor latencia,64,1,normal_2,0.3,0.0,994.6,1.39694
+Mejor latencia,65,0,normal_2,0.1,0.0,952.7,1.3807800000000001
+Mejor latencia,66,0,normal_2,0.3,0.0,962.1,1.38394
+Mejor latencia,67,1,normal_2,0.3,0.0,964.9,1.38506
+Mejor latencia,68,0,normal_2,0.4,0.0,983.4,1.39216
+Mejor latencia,69,0,normal_2,0.4,0.0,991.2,1.39528
+Mejor latencia,70,1,normal_2,0.2,0.0,977.5,1.3904
+Mejor latencia,71,1,normal_2,0.3,0.0,983.8,1.39262
+Mejor latencia,72,0,latencia_3,0.3,0.0,954.4,1.38086
+Mejor latencia,73,0,latencia_3,0.5,0.0,978.7,1.38998
+Mejor latencia,74,0,latencia_3,0.5,0.0,997.8,1.39762
+Mejor latencia,75,0,latencia_3,0.2,0.0,983.9,1.39296
+Mejor latencia,76,0,latencia_3,0.1,0.0,991.9,1.39646
+Mejor latencia,77,0,latencia_3,0.2,0.0,973.5,1.3888
+Mejor latencia,78,0,latencia_3,0.5,0.0,954.0,1.3801
+Mejor latencia,79,0,latencia_3,0.5,0.0,990.6,1.39474
+Mejor latencia,80,0,latencia_3,0.2,0.0,977.8,1.39052
+Mejor latencia,81,0,latencia_3,0.4,0.0,957.9,1.38196
+Mejor latencia,82,0,latencia_3,0.2,0.0,976.3,1.38992
+Mejor latencia,83,0,latencia_3,0.4,0.0,974.1,1.3884400000000001
+Mejor latencia,84,0,latencia_3,0.2,0.0,968.8,1.38692
+Mejor latencia,85,0,latencia_3,0.4,0.0,987.0,1.3936
+Mejor latencia,86,0,latencia_3,0.5,0.0,991.5,1.3951
+Mejor latencia,87,0,latencia_3,0.2,0.0,986.0,1.3938000000000001
+Mejor latencia,88,0,latencia_3,0.3,0.0,961.4,1.38366
+Mejor latencia,89,0,latencia_3,0.1,0.0,992.9,1.39686
+Mejor latencia,90,0,latencia_3,0.3,0.0,958.5,1.3825
+Mejor latencia,91,0,latencia_3,0.2,0.0,960.0,1.3834
+Mejor latencia,92,0,latencia_3,0.3,0.0,972.6,1.38814
+Mejor latencia,93,0,latencia_3,0.3,0.0,989.4,1.39486
+Mejor latencia,94,0,latencia_3,0.5,0.0,976.5,1.3891
+Mejor latencia,95,0,latencia_3,0.2,0.0,992.2,1.39628
+Mejor latencia,96,0,latencia_3,0.5,0.0,954.2,1.3801800000000002
+Mejor latencia,97,0,latencia_3,0.2,0.0,972.8,1.38852
+Mejor latencia,98,0,latencia_3,0.2,0.0,965.6,1.38564
+Mejor latencia,99,0,latencia_3,0.4,0.0,988.2,1.39408
+Mejor latencia,100,0,latencia_3,0.2,0.0,950.4,1.3795600000000001
+Mejor latencia,101,0,latencia_3,0.2,0.0,981.8,1.39212
+Mejor latencia,102,0,latencia_3,0.2,0.0,987.4,1.39436
+Mejor latencia,103,0,latencia_3,0.2,0.0,960.5,1.3836
+Mejor latencia,104,0,latencia_3,0.3,0.0,952.3,1.38002
+Mejor latencia,105,0,latencia_3,0.4,0.0,979.1,1.3904400000000001
+Mejor latencia,106,0,latencia_3,0.3,0.0,986.5,1.3937
+Mejor latencia,107,0,latencia_3,0.4,0.0,993.6,1.3962400000000001
+Mejor latencia,108,0,latencia_3,0.4,0.0,985.2,1.3928800000000001
+Mejor latencia,109,0,latencia_3,0.3,0.0,984.6,1.39294
+Mejor latencia,110,0,latencia_3,0.3,0.0,979.1,1.39074
+Mejor latencia,111,0,latencia_3,0.1,0.0,968.8,1.38722
+Mejor latencia,112,0,latencia_3,0.4,0.0,952.0,1.3796
+Mejor latencia,113,0,latencia_3,0.2,0.0,967.9,1.38656
+Mejor latencia,114,0,latencia_3,0.2,0.0,961.6,1.3840400000000002
+Mejor latencia,115,0,latencia_3,0.3,0.0,968.1,1.3863400000000001
+Mejor latencia,116,0,latencia_3,0.2,0.0,972.7,1.38848
+Mejor latencia,117,0,latencia_3,0.1,0.0,970.3,1.38782
+Mejor latencia,118,0,latencia_3,0.5,0.0,985.3,1.39262
+Mejor latencia,119,0,normal_3,0.3,0.0,953.8,1.38062
+Mejor latencia,120,0,normal_3,0.2,0.0,965.3,1.38552
+Mejor latencia,121,0,normal_3,0.4,0.0,996.3,1.3973200000000001
+Mejor latencia,122,0,normal_3,0.1,0.0,996.7,1.39838
+Mejor latencia,123,0,normal_3,0.2,0.0,977.4,1.39036
+Mejor latencia,124,0,normal_3,0.4,0.0,977.5,1.3898000000000001
+Mejor latencia,125,1,normal_3,0.5,0.0,957.4,1.3814600000000001
+Mejor latencia,126,0,normal_3,0.3,0.0,968.3,1.38642
+Mejor latencia,127,1,normal_3,0.2,0.0,989.2,1.39508
+Mejor latencia,128,1,normal_3,0.5,0.0,984.2,1.3921800000000002
+Mejor latencia,129,0,normal_3,0.1,0.0,987.3,1.39462
+Mejor latencia,130,0,normal_3,0.3,0.0,985.6,1.39334
+Mejor latencia,131,0,normal_3,0.3,0.0,959.2,1.3827800000000001
+Mejor latencia,132,1,normal_3,0.2,0.0,971.1,1.3878400000000002
+Mejor latencia,133,1,normal_3,0.2,0.0,984.4,1.39316
+Mejor latencia,134,1,normal_3,0.1,0.0,952.2,1.3805800000000001
+Mejor latencia,135,0,normal_3,0.3,0.0,978.6,1.39054
+Mejor latencia,136,1,normal_3,0.3,0.0,990.9,1.39546
+Mejor latencia,137,0,normal_3,0.5,0.0,997.1,1.39734
+Mejor latencia,138,1,normal_3,0.2,0.0,997.7,1.3984800000000002
+Mejor latencia,139,0,normal_3,0.4,0.0,959.6,1.38264
+Mejor latencia,140,1,normal_3,0.3,0.0,959.7,1.38298
+Mejor latencia,141,0,normal_3,0.4,0.0,990.5,1.395
+Mejor latencia,142,1,normal_3,0.4,0.0,982.8,1.39192
+Mejor latencia,143,0,normal_3,0.1,0.0,959.6,1.38354
+Mejor latencia,144,0,normal_3,0.2,0.0,967.2,1.3862800000000002
+Mejor latencia,145,0,normal_3,0.5,0.0,962.9,1.38366
+Mejor latencia,146,1,normal_3,0.4,0.0,962.9,1.38396
+Mejor latencia,147,1,normal_3,0.4,0.0,967.0,1.3856000000000002
+Mejor latencia,148,0,normal_3,0.5,0.0,980.1,1.39054
+Mejor latencia,149,1,normal_3,0.3,0.0,963.6,1.38454
+Mejor latencia,150,1,normal_3,0.4,0.0,990.9,1.39516
+Mejor latencia,151,1,normal_3,0.5,0.0,973.0,1.3877000000000002
+Mejor latencia,152,0,normal_3,0.4,0.0,983.9,1.39236
+Mejor latencia,153,1,normal_3,0.3,0.0,964.2,1.3847800000000001
+Mejor latencia,154,0,normal_3,0.2,0.0,997.1,1.39824
+Mejor latencia,155,0,normal_3,0.2,0.0,993.8,1.39692
+Mejor latencia,156,0,normal_3,0.3,0.0,977.8,1.39022
+Mejor latencia,157,0,normal_3,0.4,0.0,965.6,1.38504
+Mejor latencia,158,1,normal_3,0.2,0.0,987.9,1.39456
+Mejor latencia,159,1,normal_3,0.3,0.0,967.0,1.3859
+Mejor latencia,160,0,normal_3,0.2,0.0,991.6,1.3960400000000002
+Mejor latencia,161,0,normal_3,0.5,0.0,972.5,1.3875
+Mejor latencia,162,1,normal_3,0.1,0.0,965.2,1.38578
+Mejor latencia,163,1,normal_3,0.2,0.0,963.4,1.38476
+Mejor latencia,164,1,normal_3,0.5,0.0,974.6,1.38834
+Mejor latencia,165,0,normal_3,0.4,0.0,959.4,1.38256
+Mejor latencia,166,1,normal_3,0.2,0.0,963.5,1.3848
+Mejor latencia,167,0,normal_3,0.2,0.0,997.6,1.39844
+Mejor latencia,168,0,normal_3,0.3,0.0,985.0,1.3931
+Mejor latencia,169,1,normal_3,0.2,0.0,984.9,1.39336
+Mejor latencia,170,0,normal_3,0.4,0.0,962.1,1.38364
+Mejor latencia,171,1,normal_3,0.3,0.0,951.7,1.37978
+Mejor latencia,172,1,normal_3,0.3,0.0,965.8,1.3854199999999999
+Mejor latencia,173,1,normal_3,0.4,0.0,971.5,1.3874
+Mejor latencia,174,0,normal_3,0.1,0.0,994.3,1.3974199999999999
+Mejor latencia,175,0,normal_3,0.3,0.0,955.8,1.3814199999999999
+Mejor latencia,176,1,normal_3,0.3,0.0,996.7,1.39778
+Mejor latencia,177,0,normal_3,0.2,0.0,961.5,1.384
+Mejor latencia,178,0,normal_3,0.5,0.0,968.1,1.38574
+Mejor latencia,179,1,normal_3,0.5,0.0,980.9,1.39086
+Mejor latencia,180,0,normal_3,0.3,0.0,993.9,1.39666
+Mejor latencia,181,1,normal_3,0.3,0.0,968.2,1.38638
+Mejor latencia,182,0,normal_3,0.4,0.0,974.9,1.38876
+Mejor latencia,183,1,normal_3,0.2,0.0,953.9,1.38096
+Mejor latencia,184,0,normal_3,0.2,0.0,955.9,1.38176
+Mejor latencia,185,0,normal_3,0.4,0.0,973.3,1.38812
+Mejor latencia,186,1,normal_3,0.3,0.0,972.2,1.38798
+Mejor latencia,187,0,normal_3,0.3,0.0,997.9,1.39826
+Mejor latencia,188,1,normal_3,0.2,0.0,954.4,1.38116
+Mejor latencia,189,1,normal_3,0.4,0.0,970.3,1.38692
+Mejor latencia,190,0,normal_3,0.5,0.0,962.7,1.38358
+Mejor latencia,191,1,perdida_2,0.4,0.0,983.1,1.3920400000000002
+Mejor latencia,192,0,perdida_2,0.4,10.1,981.8,1.36122
+Mejor latencia,193,1,perdida_2,0.3,0.0,961.8,1.38382
+Mejor latencia,194,0,perdida_2,0.4,10.4,975.0,1.3576000000000001
+Mejor latencia,195,1,perdida_2,0.2,0.0,993.7,1.39688
+Mejor latencia,196,1,perdida_2,0.3,0.0,966.7,1.38578
+Mejor latencia,197,1,perdida_2,0.2,0.0,993.5,1.3968
+Mejor latencia,198,1,perdida_2,0.3,0.0,953.7,1.3805800000000001
+Mejor latencia,199,0,perdida_2,0.4,9.8,952.1,1.35024
+Mejor latencia,200,1,perdida_2,0.5,0.0,961.5,1.3831
+Aleatoria,1,0,normal,0.3,0.0,975.8,1.3894199999999999
+Aleatoria,2,0,normal,0.4,0.0,974.0,1.3884
+Aleatoria,3,1,normal,0.5,0.0,999.3,1.39822
+Aleatoria,4,1,normal,0.4,0.0,993.9,1.39636
+Aleatoria,5,0,normal,0.2,0.0,999.9,1.3993600000000002
+Aleatoria,6,1,normal,0.2,0.0,959.7,1.38328
+Aleatoria,7,1,normal,0.1,0.0,986.8,1.39442
+Aleatoria,8,1,normal,0.3,0.0,971.1,1.38754
+Aleatoria,9,1,normal,0.5,0.0,968.0,1.3857
+Aleatoria,10,1,normal,0.2,0.0,956.8,1.38212
+Aleatoria,11,1,normal,0.3,0.0,965.7,1.38538
+Aleatoria,12,1,normal,0.3,0.0,996.8,1.39782
+Aleatoria,13,0,normal,0.3,0.0,976.8,1.38982
+Aleatoria,14,0,normal,0.1,0.0,959.9,1.38366
+Aleatoria,15,1,normal,0.2,0.0,982.9,1.39256
+Aleatoria,16,0,normal,0.1,0.0,982.7,1.3927800000000001
+Aleatoria,17,1,normal,0.2,0.0,998.5,1.3988
+Aleatoria,18,1,normal,0.3,0.0,970.1,1.38714
+Aleatoria,19,1,normal,0.1,0.0,978.1,1.39094
+Aleatoria,20,1,normal,0.2,0.0,971.4,1.38796
+Aleatoria,21,1,normal,0.2,0.0,985.7,1.39368
+Aleatoria,22,0,normal,0.5,0.0,954.8,1.38042
+Aleatoria,23,0,normal,0.2,0.0,953.3,1.38072
+Aleatoria,24,0,normal,0.3,0.0,974.0,1.3887
+Aleatoria,25,0,normal,0.2,0.0,960.2,1.38348
+Aleatoria,26,1,normal,0.3,0.0,998.2,1.39838
+Aleatoria,27,0,normal,0.3,0.0,977.0,1.3899
+Aleatoria,28,1,normal,0.3,0.0,998.1,1.39834
+Aleatoria,29,1,normal,0.4,0.0,967.4,1.38576
+Aleatoria,30,0,normal,0.4,0.0,980.6,1.39104
+Aleatoria,31,1,normal,0.4,0.0,964.8,1.3847200000000002
+Aleatoria,32,0,normal,0.3,0.0,992.6,1.39614
+Aleatoria,33,0,normal,0.3,0.0,993.6,1.3965400000000001
+Aleatoria,34,1,normal,0.4,0.0,955.8,1.3811200000000001
+Aleatoria,35,0,normal,0.5,0.0,996.5,1.3971
+Aleatoria,36,0,normal,0.5,0.0,964.8,1.38442
+Aleatoria,37,0,normal,0.2,0.0,955.6,1.38164
+Aleatoria,38,1,normal,0.2,0.0,982.6,1.3924400000000001
+Aleatoria,39,0,normal,0.4,0.0,993.4,1.39616
+Aleatoria,40,0,normal,0.1,0.0,958.8,1.38322
+Aleatoria,41,1,normal,0.3,0.0,958.4,1.38246
+Aleatoria,42,1,normal,0.4,0.0,981.4,1.3913600000000002
+Aleatoria,43,1,normal,0.4,0.0,996.6,1.39744
+Aleatoria,44,1,normal,0.2,0.0,957.0,1.3822
+Aleatoria,45,0,normal,0.1,0.0,953.5,1.3811
+Aleatoria,46,1,normal,0.4,0.0,962.4,1.38376
+Aleatoria,47,0,normal,0.4,0.0,977.3,1.38972
+Aleatoria,48,0,normal,0.1,0.0,972.3,1.38862
+Aleatoria,49,1,normal,0.4,0.0,983.0,1.3920000000000001
+Aleatoria,50,1,normal,0.3,0.0,973.3,1.38842
+Aleatoria,51,1,normal,0.1,0.0,959.1,1.38334
+Aleatoria,52,1,normal,0.3,0.0,983.1,1.39234
+Aleatoria,53,0,normal,0.3,0.0,969.8,1.3870200000000001
+Aleatoria,54,0,normal,0.5,0.0,991.6,1.39514
+Aleatoria,55,0,normal,0.5,0.0,982.8,1.39162
+Aleatoria,56,1,normal,0.4,0.0,953.6,1.3802400000000001
+Aleatoria,57,1,normal,0.4,0.0,984.7,1.3926800000000001
+Aleatoria,58,1,normal,0.3,0.0,984.6,1.39294
+Aleatoria,59,1,normal,0.4,0.0,960.0,1.3828
+Aleatoria,60,1,normal,0.3,0.0,983.7,1.39258
+Aleatoria,61,1,normal,0.3,0.0,965.5,1.3853
+Aleatoria,62,1,normal,0.2,0.0,992.4,1.39636
+Aleatoria,63,0,normal,0.4,0.0,974.1,1.3884400000000001
+Aleatoria,64,1,normal,0.1,0.0,996.1,1.3981400000000002
+Aleatoria,65,1,normal,0.2,0.0,972.2,1.38828
+Aleatoria,66,1,normal,0.4,0.0,962.7,1.38388
+Aleatoria,67,1,normal,0.4,0.0,956.7,1.38148
+Aleatoria,68,0,latencia_3,0.2,0.0,984.8,1.3933200000000001
+Aleatoria,69,1,latencia_3,104.1,0.0,962.2,-1.92742
+Aleatoria,70,0,latencia_3,0.2,0.0,987.5,1.3944
+Aleatoria,71,0,latencia_3,0.3,0.0,970.4,1.38726
+Aleatoria,72,0,latencia_3,0.2,0.0,957.2,1.3822800000000002
+Aleatoria,73,0,latencia_3,0.4,0.0,972.2,1.38768
+Aleatoria,74,0,latencia_3,0.3,0.0,962.4,1.38406
+Aleatoria,75,0,latencia_3,0.4,0.0,955.7,1.38108
+Aleatoria,76,0,latencia_3,0.5,0.0,973.5,1.3879000000000001
+Aleatoria,77,0,latencia_3,0.3,0.0,981.6,1.39174
+Aleatoria,78,0,latencia_3,0.4,0.0,993.2,1.39608
+Aleatoria,79,0,latencia_3,0.2,0.0,983.3,1.39272
+Aleatoria,80,1,latencia_3,103.4,0.0,965.5,-1.924
+Aleatoria,81,1,latencia_3,96.4,0.0,999.5,-1.8894
+Aleatoria,82,1,latencia_3,99.3,0.0,950.1,-1.91786
+Aleatoria,83,0,latencia_3,0.4,0.0,951.0,1.3792
+Aleatoria,84,1,latencia_3,103.8,0.0,957.5,-1.9284
+Aleatoria,85,0,latencia_3,0.5,0.0,991.3,1.39502
+Aleatoria,86,0,latencia_3,0.1,0.0,989.0,1.3953
+Aleatoria,87,0,latencia_3,0.2,0.0,998.3,1.39872
+Aleatoria,88,0,latencia_3,0.4,0.0,995.7,1.39708
+Aleatoria,89,1,latencia_3,96.0,0.0,978.5,-1.8965999999999998
+Aleatoria,90,1,latencia_3,100.4,0.0,968.8,-1.91368
+Aleatoria,91,1,latencia_3,100.6,0.0,956.8,-1.91908
+Aleatoria,92,0,latencia_3,0.2,0.0,974.9,1.38936
+Aleatoria,93,0,latencia_3,0.3,0.0,958.9,1.38266
+Aleatoria,94,0,latencia_3,0.2,0.0,957.7,1.3824800000000002
+Aleatoria,95,0,latencia_3,0.4,0.0,986.9,1.39356
+Aleatoria,96,0,latencia_3,0.4,0.0,983.8,1.39232
+Aleatoria,97,1,latencia_3,97.1,0.0,962.3,-1.90638
+Aleatoria,98,1,latencia_3,103.8,0.0,952.7,-1.93032
+Aleatoria,99,1,latencia_3,101.0,0.0,997.9,-1.90384
+Aleatoria,100,1,latencia_3,102.3,0.0,966.1,-1.9204599999999998
+Aleatoria,101,0,latencia_3,0.2,0.0,984.1,1.39304
+Aleatoria,102,0,latencia_3,0.5,0.0,984.9,1.39246
+Aleatoria,103,0,latencia_3,0.5,0.0,958.9,1.38206
+Aleatoria,104,0,latencia_3,0.5,0.0,974.9,1.38846
+Aleatoria,105,0,latencia_3,0.4,0.0,987.2,1.39368
+Aleatoria,106,1,latencia_3,99.2,0.0,999.9,-1.89764
+Aleatoria,107,1,latencia_3,100.1,0.0,953.1,-1.91906
+Aleatoria,108,1,latencia_3,95.6,0.0,983.3,-1.8934799999999998
+Aleatoria,109,0,latencia_3,0.4,0.0,999.5,1.3986
+Aleatoria,110,0,latencia_3,0.3,0.0,960.4,1.38326
+Aleatoria,111,1,latencia_3,98.3,0.0,985.1,-1.90086
+Aleatoria,112,0,latencia_3,0.2,0.0,990.2,1.39548
+Aleatoria,113,0,latencia_3,0.2,0.0,952.1,1.3802400000000001
+Aleatoria,114,0,latencia_3,0.2,0.0,996.3,1.39792
+Aleatoria,115,0,latencia_3,0.5,0.0,990.1,1.3945400000000001
+Aleatoria,116,0,latencia_3,0.2,0.0,988.7,1.3948800000000001
+Aleatoria,117,1,congestion_3,0.2,0.0,9.8,1.00332
+Aleatoria,118,0,congestion_3,0.2,0.0,955.2,1.38148
+Aleatoria,119,0,congestion_3,0.3,0.0,971.7,1.38778
+Aleatoria,120,1,congestion_3,0.1,0.0,10.0,1.0037
+Aleatoria,121,1,congestion_3,0.4,0.0,9.4,1.00256
+Aleatoria,122,0,congestion_3,0.3,0.0,976.2,1.38958
+Aleatoria,123,0,congestion_3,0.1,0.0,956.7,1.38238
+Aleatoria,124,1,congestion_3,0.3,0.0,9.3,1.00282
+Aleatoria,125,1,congestion_3,0.4,0.0,9.2,1.00248
+Aleatoria,126,1,congestion_3,0.4,0.0,9.4,1.00256
+Aleatoria,127,0,congestion_3,0.1,0.0,965.6,1.38594
+Aleatoria,128,1,congestion_3,0.5,0.0,9.5,1.0023
+Aleatoria,129,0,congestion_3,0.2,0.0,955.1,1.38144
+Aleatoria,130,1,congestion_3,0.2,0.0,9.6,1.00324
+Aleatoria,131,1,congestion_3,0.2,0.0,10.0,1.0034
+Aleatoria,132,0,congestion_3,0.2,0.0,957.2,1.3822800000000002
+Aleatoria,133,1,congestion_3,0.2,0.0,9.0,1.003
+Aleatoria,134,1,congestion_3,0.4,0.0,9.4,1.00256
+Aleatoria,135,1,congestion_3,0.3,0.0,9.0,1.0027
+Aleatoria,136,1,congestion_3,0.3,0.0,9.2,1.00278
+Aleatoria,137,0,congestion_3,0.3,0.0,956.8,1.38182
+Aleatoria,138,1,congestion_3,0.2,0.0,9.9,1.00336
+Aleatoria,139,1,congestion_3,0.4,0.0,9.1,1.00244
+Aleatoria,140,1,congestion_3,0.5,0.0,9.4,1.00226
+Aleatoria,141,1,congestion_3,0.4,0.0,9.0,1.0024
+Aleatoria,142,0,congestion_3,0.1,0.0,968.4,1.38706
+Aleatoria,143,1,congestion_3,0.3,0.0,9.2,1.00278
+Aleatoria,144,0,congestion_3,0.2,0.0,982.0,1.3922
+Aleatoria,145,1,congestion_3,0.3,0.0,9.4,1.00286
+Aleatoria,146,0,congestion_3,0.2,0.0,952.8,1.38052
+Aleatoria,147,1,congestion_3,0.2,0.0,9.2,1.00308
+Aleatoria,148,0,congestion_3,0.4,0.0,986.1,1.39324
+Aleatoria,149,1,congestion_3,0.2,0.0,9.9,1.00336
+Aleatoria,150,0,congestion_3,0.3,0.0,981.5,1.3917
+Aleatoria,151,0,congestion_3,0.5,0.0,993.0,1.3957000000000002
+Aleatoria,152,0,congestion_3,0.4,0.0,961.9,1.3835600000000001
+Aleatoria,153,1,congestion_3,0.4,0.0,9.3,1.00252
+Aleatoria,154,1,congestion_3,0.3,0.0,9.6,1.00294
+Aleatoria,155,0,congestion_3,0.5,0.0,996.7,1.39718
+Aleatoria,156,1,congestion_3,0.2,0.0,9.3,1.00312
+Aleatoria,157,1,congestion_3,0.4,0.0,9.1,1.00244
+Aleatoria,158,0,congestion_3,0.1,0.0,959.7,1.38358
+Aleatoria,159,1,congestion_3,0.2,0.0,9.6,1.00324
+Aleatoria,160,0,congestion_3,0.3,0.0,976.7,1.38978
+Aleatoria,161,0,congestion_3,0.4,0.0,972.0,1.3876
+Aleatoria,162,1,congestion_3,0.3,0.0,9.3,1.00282
+Aleatoria,163,1,congestion_3,0.2,0.0,9.7,1.00328
+Aleatoria,164,0,congestion_3,0.4,0.0,985.3,1.3929200000000002
+Aleatoria,165,1,congestion_3,0.1,0.0,9.3,1.00342
+Aleatoria,166,0,congestion_3,0.3,0.0,952.0,1.3799000000000001
+Aleatoria,167,1,congestion_3,0.4,0.0,9.5,1.0026
+Aleatoria,168,0,congestion_3,0.2,0.0,986.5,1.3940000000000001
+Aleatoria,169,1,congestion_3,0.2,0.0,9.9,1.00336
+Aleatoria,170,1,congestion_3,0.1,0.0,9.3,1.00342
+Aleatoria,171,0,congestion_3,0.2,0.0,984.6,1.39324
+Aleatoria,172,1,congestion_3,0.5,0.0,9.1,1.00214
+Aleatoria,173,0,congestion_3,0.3,0.0,999.4,1.39886
+Aleatoria,174,1,congestion_3,0.5,0.0,9.3,1.00222
+Aleatoria,175,1,congestion_3,0.5,0.0,9.4,1.00226
+Aleatoria,176,0,congestion_3,0.1,0.0,978.0,1.3909
+Aleatoria,177,1,congestion_3,0.1,0.0,9.4,1.00346
+Aleatoria,178,0,congestion_3,0.2,0.0,989.7,1.39528
+Aleatoria,179,0,congestion_3,0.4,0.0,999.1,1.3984400000000001
+Aleatoria,180,1,congestion_3,0.4,0.0,9.1,1.00244
+Aleatoria,181,1,congestion_3,0.2,0.0,9.3,1.00312
+Aleatoria,182,1,congestion_3,0.2,0.0,9.7,1.00328
+Aleatoria,183,0,congestion_3,0.4,0.0,955.6,1.38104
+Aleatoria,184,0,congestion_3,0.2,0.0,970.9,1.38776
+Aleatoria,185,0,congestion_3,0.2,0.0,950.1,1.37944
+Aleatoria,186,0,congestion_3,0.4,0.0,979.1,1.3904400000000001
+Aleatoria,187,0,congestion_3,0.5,0.0,998.0,1.3977
+Aleatoria,188,1,congestion_3,0.1,0.0,9.5,1.0035
+Aleatoria,189,1,congestion_3,0.2,0.0,9.9,1.00336
+Aleatoria,190,0,congestion_3,0.5,0.0,976.7,1.38918
+Aleatoria,191,0,congestion_3,0.4,0.0,999.7,1.3986800000000001
+Aleatoria,192,0,congestion_3,0.4,0.0,956.9,1.38156
+Aleatoria,193,1,congestion_3,0.2,0.0,9.7,1.00328
+Aleatoria,194,0,congestion_3,0.4,0.0,993.3,1.39612
+Aleatoria,195,0,congestion_3,0.3,0.0,964.8,1.38502
+Aleatoria,196,1,congestion_3,0.1,0.0,9.4,1.00346
+Aleatoria,197,1,congestion_3,0.5,0.0,9.9,1.00246
+Aleatoria,198,0,congestion_3,0.3,0.0,954.4,1.38086
+Aleatoria,199,0,congestion_3,0.2,0.0,980.7,1.39168
+Aleatoria,200,0,congestion_3,0.4,0.0,956.1,1.38124
+Siempre Ruta A,1,0,normal,0.1,0.0,985.8,1.39402
+Siempre Ruta A,2,0,normal,0.4,0.0,997.1,1.39764
+Siempre Ruta A,3,0,normal,0.3,0.0,980.0,1.3911
+Siempre Ruta A,4,0,normal,0.2,0.0,997.7,1.3984800000000002
+Siempre Ruta A,5,0,normal,0.4,0.0,985.6,1.39304
+Siempre Ruta A,6,0,normal,0.4,0.0,964.2,1.3844800000000002
+Siempre Ruta A,7,0,normal,0.3,0.0,993.1,1.39634
+Siempre Ruta A,8,0,normal,0.3,0.0,988.6,1.3945400000000001
+Siempre Ruta A,9,0,normal,0.5,0.0,967.0,1.3853
+Siempre Ruta A,10,0,normal,0.4,0.0,983.7,1.39228
+Siempre Ruta A,11,0,normal,0.3,0.0,991.2,1.39558
+Siempre Ruta A,12,0,normal,0.4,0.0,979.2,1.3904800000000002
+Siempre Ruta A,13,0,normal,0.3,0.0,950.3,1.3792200000000001
+Siempre Ruta A,14,0,normal,0.3,0.0,958.5,1.3825
+Siempre Ruta A,15,0,normal,0.2,0.0,955.2,1.38148
+Siempre Ruta A,16,0,normal,0.3,0.0,986.3,1.3936199999999999
+Siempre Ruta A,17,0,normal,0.5,0.0,969.9,1.38646
+Siempre Ruta A,18,0,normal,0.3,0.0,992.7,1.39618
+Siempre Ruta A,19,0,normal,0.3,0.0,963.6,1.38454
+Siempre Ruta A,20,0,normal,0.5,0.0,956.5,1.3811
+Siempre Ruta A,21,0,normal,0.1,0.0,970.9,1.38806
+Siempre Ruta A,22,0,normal,0.4,0.0,978.2,1.39008
+Siempre Ruta A,23,0,normal,0.4,0.0,992.5,1.3958
+Siempre Ruta A,24,0,normal,0.3,0.0,991.7,1.39578
+Siempre Ruta A,25,0,normal,0.3,0.0,989.6,1.39494
+Siempre Ruta A,26,0,normal,0.2,0.0,968.7,1.3868800000000001
+Siempre Ruta A,27,0,normal,0.5,0.0,996.7,1.39718
+Siempre Ruta A,28,0,normal,0.3,0.0,971.0,1.3875
+Siempre Ruta A,29,0,normal,0.3,0.0,970.6,1.38734
+Siempre Ruta A,30,0,normal,0.5,0.0,993.6,1.39594
+Siempre Ruta A,31,0,normal,0.4,0.0,986.1,1.39324
+Siempre Ruta A,32,0,normal,0.3,0.0,980.9,1.39146
+Siempre Ruta A,33,0,normal,0.2,0.0,992.8,1.39652
+Siempre Ruta A,34,0,normal,0.2,0.0,958.5,1.3828
+Siempre Ruta A,35,0,normal,0.4,0.0,972.8,1.38792
+Siempre Ruta A,36,0,normal,0.3,0.0,976.6,1.38974
+Siempre Ruta A,37,0,normal,0.1,0.0,960.1,1.38374
+Siempre Ruta A,38,0,normal,0.1,0.0,979.6,1.39154
+Siempre Ruta A,39,0,normal,0.2,0.0,991.5,1.396
+Siempre Ruta A,40,0,normal,0.5,0.0,964.2,1.3841800000000002
+Siempre Ruta A,41,0,normal,0.3,0.0,966.1,1.38554
+Siempre Ruta A,42,0,normal,0.2,0.0,968.5,1.3868
+Siempre Ruta A,43,0,normal,0.4,0.0,968.8,1.38632
+Siempre Ruta A,44,0,normal,0.2,0.0,957.1,1.38224
+Siempre Ruta A,45,0,normal_2,0.3,0.0,992.8,1.39622
+Siempre Ruta A,46,0,normal_2,0.1,0.0,961.9,1.38446
+Siempre Ruta A,47,0,normal_2,0.3,0.0,991.6,1.39574
+Siempre Ruta A,48,0,normal_2,0.3,0.0,984.7,1.39298
+Siempre Ruta A,49,0,normal_2,0.3,0.0,963.6,1.38454
+Siempre Ruta A,50,0,normal_2,0.2,0.0,977.9,1.39056
+Siempre Ruta A,51,0,normal_2,0.3,0.0,953.8,1.38062
+Siempre Ruta A,52,0,normal_2,0.3,0.0,977.6,1.39014
+Siempre Ruta A,53,0,normal_2,0.4,0.0,953.8,1.38032
+Siempre Ruta A,54,0,normal_2,0.5,0.0,959.3,1.38222
+Siempre Ruta A,55,0,normal_2,0.3,0.0,959.2,1.3827800000000001
+Siempre Ruta A,56,0,normal_2,0.3,0.0,977.1,1.38994
+Siempre Ruta A,57,0,normal_2,0.2,0.0,978.8,1.39092
+Siempre Ruta A,58,0,normal_2,0.3,0.0,962.6,1.38414
+Siempre Ruta A,59,0,normal_2,0.1,0.0,972.7,1.3887800000000001
+Siempre Ruta A,60,0,normal_2,0.4,0.0,972.8,1.38792
+Siempre Ruta A,61,0,normal_2,0.3,0.0,958.1,1.3823400000000001
+Siempre Ruta A,62,0,normal_2,0.4,0.0,971.3,1.3873199999999999
+Siempre Ruta A,63,0,normal_2,0.5,0.0,984.9,1.39246
+Siempre Ruta A,64,0,normal_2,0.1,0.0,984.2,1.39338
+Siempre Ruta A,65,0,normal_2,0.5,0.0,959.3,1.38222
+Siempre Ruta A,66,0,normal_2,0.2,0.0,994.9,1.39736
+Siempre Ruta A,67,0,normal_2,0.4,0.0,961.1,1.38324
+Siempre Ruta A,68,0,normal_2,0.2,0.0,975.1,1.38944
+Siempre Ruta A,69,0,normal_2,0.3,0.0,965.1,1.38514
+Siempre Ruta A,70,0,normal_2,0.4,0.0,971.6,1.38744
+Siempre Ruta A,71,0,normal_2,0.1,0.0,959.7,1.38358
+Siempre Ruta A,72,0,normal_2,0.3,0.0,970.1,1.38714
+Siempre Ruta A,73,0,normal_2,0.1,0.0,969.1,1.38734
+Siempre Ruta A,74,0,normal_2,0.1,0.0,968.3,1.38702
+Siempre Ruta A,75,0,latencia_2,96.0,0.0,972.5,-1.899
+Siempre Ruta A,76,0,latencia_2,100.2,0.0,975.3,-1.91048
+Siempre Ruta A,77,0,latencia_2,99.8,0.0,976.6,-1.90876
+Siempre Ruta A,78,0,latencia_2,101.7,0.0,988.9,-1.90954
+Siempre Ruta A,79,0,latencia_2,103.4,0.0,954.6,-1.92836
+Siempre Ruta A,80,0,latencia_2,96.2,0.0,959.7,-1.90472
+Siempre Ruta A,81,0,latencia_2,96.8,0.0,999.2,-1.89072
+Siempre Ruta A,82,0,latencia_2,103.4,0.0,959.7,-1.92632
+Siempre Ruta A,83,0,latencia_2,101.4,0.0,974.6,-1.91436
+Siempre Ruta A,84,0,latencia_2,96.1,0.0,985.3,-1.89418
+Siempre Ruta A,85,0,latencia_2,95.8,0.0,953.0,-1.9062
+Siempre Ruta A,86,0,latencia_2,103.4,0.0,987.1,-1.91536
+Siempre Ruta A,87,0,latencia_2,96.3,0.0,957.5,-1.9059
+Siempre Ruta A,88,0,latencia_2,97.0,0.0,959.8,-1.9070799999999999
+Siempre Ruta A,89,0,latencia_2,102.4,0.0,989.3,-1.91148
+Siempre Ruta A,90,0,latencia_2,101.8,0.0,968.4,-1.91804
+Siempre Ruta A,91,0,latencia_2,104.1,0.0,987.3,-1.91738
+Siempre Ruta A,92,0,latencia_2,95.1,0.0,953.7,-1.90382
+Siempre Ruta A,93,0,latencia_2,98.8,0.0,969.2,-1.90872
+Siempre Ruta A,94,0,latencia_2,99.1,0.0,997.2,-1.8984199999999998
+Siempre Ruta A,95,0,latencia_2,99.6,0.0,985.0,-1.9047999999999998
+Siempre Ruta A,96,0,latencia_2,97.0,0.0,968.5,-1.9036
+Siempre Ruta A,97,0,latencia_2,99.5,0.0,989.9,-1.90254
+Siempre Ruta A,98,0,latencia_2,100.5,0.0,998.9,-1.90194
+Siempre Ruta A,99,0,latencia_2,101.8,0.0,992.4,-1.90844
+Siempre Ruta A,100,0,latencia_2,97.2,0.0,959.1,-1.90796
+Siempre Ruta A,101,0,latencia_2,97.7,0.0,961.1,-1.9086599999999998
+Siempre Ruta A,102,0,latencia_2,100.8,0.0,993.6,-1.90496
+Siempre Ruta A,103,0,latencia_2,101.6,0.0,963.6,-1.91936
+Siempre Ruta A,104,0,latencia_2,99.8,0.0,950.5,-1.9192
+Siempre Ruta A,105,0,latencia_2,97.9,0.0,960.8,-1.90938
+Siempre Ruta A,106,0,latencia_2,96.7,0.0,971.0,-1.9017
+Siempre Ruta A,107,0,latencia_2,99.3,0.0,997.5,-1.8989
+Siempre Ruta A,108,0,latencia_2,95.3,0.0,998.7,-1.88642
+Siempre Ruta A,109,0,latencia_2,99.2,0.0,995.2,-1.8995199999999999
+Siempre Ruta A,110,0,latencia_2,100.9,0.0,961.6,-1.9180599999999999
+Siempre Ruta A,111,0,latencia_2,99.4,0.0,996.5,-1.8996
+Siempre Ruta A,112,0,latencia_2,95.1,0.0,962.4,-1.90034
+Siempre Ruta A,113,0,latencia_2,98.3,0.0,997.0,-1.8961000000000001
+Siempre Ruta A,114,0,latencia_2,103.9,0.0,955.4,-1.92954
+Siempre Ruta A,115,0,latencia_2,101.8,0.0,971.0,-1.917
+Siempre Ruta A,116,0,latencia_2,97.4,0.0,958.2,-1.90892
+Siempre Ruta A,117,0,latencia_2,99.7,0.0,978.9,-1.90754
+Siempre Ruta A,118,0,latencia_2,103.6,0.0,991.7,-1.9141199999999998
+Siempre Ruta A,119,0,latencia_2,102.9,0.0,983.3,-1.91538
+Siempre Ruta A,120,0,latencia_2,102.4,0.0,961.5,-1.9226
+Siempre Ruta A,121,0,latencia_2,101.4,0.0,974.7,-1.91432
+Siempre Ruta A,122,0,latencia_2,95.4,0.0,957.5,-1.9032
+Siempre Ruta A,123,0,latencia_2,103.4,0.0,982.9,-1.91704
+Siempre Ruta A,124,0,latencia_2,103.0,0.0,953.3,-1.92768
+Siempre Ruta A,125,0,latencia_2,100.5,0.0,951.2,-1.92102
+Siempre Ruta A,126,0,latencia_2,96.5,0.0,961.7,-1.90482
+Siempre Ruta A,127,0,latencia_2,101.9,0.0,973.8,-1.91618
+Siempre Ruta A,128,0,latencia_2,100.9,0.0,962.8,-1.91758
+Siempre Ruta A,129,0,latencia_2,103.0,0.0,968.0,-1.9218
+Siempre Ruta A,130,0,latencia_2,104.6,0.0,953.5,-1.9324
+Siempre Ruta A,131,0,latencia_2,101.6,0.0,972.6,-1.91576
+Siempre Ruta A,132,0,latencia_2,98.8,0.0,973.9,-1.9068399999999999
+Siempre Ruta A,133,0,latencia_2,96.7,0.0,959.7,-1.9062199999999998
+Siempre Ruta A,134,0,latencia_2,97.5,0.0,982.6,-1.89946
+Siempre Ruta A,135,0,latencia_2,97.4,0.0,995.8,-1.89388
+Siempre Ruta A,136,0,latencia_2,98.6,0.0,956.7,-1.91312
+Siempre Ruta A,137,0,latencia_2,101.6,0.0,983.7,-1.91132
+Siempre Ruta A,138,0,latencia_2,95.5,0.0,993.8,-1.88898
+Siempre Ruta A,139,0,latencia_2,102.4,0.0,958.0,-1.924
+Siempre Ruta A,140,0,latencia_2,96.8,0.0,977.6,-1.89936
+Siempre Ruta A,141,0,latencia_2,98.5,0.0,951.3,-1.91498
+Siempre Ruta A,142,0,latencia_2,102.1,0.0,970.8,-1.91798
+Siempre Ruta A,143,0,latencia_2,95.5,0.0,986.5,-1.8919
+Siempre Ruta A,144,0,latencia_2,100.8,0.0,983.9,-1.90884
+Siempre Ruta A,145,0,latencia_2,99.6,0.0,954.5,-1.9169999999999998
+Siempre Ruta A,146,0,latencia_2,103.2,0.0,963.4,-1.92424
+Siempre Ruta A,147,0,latencia_2,101.8,0.0,963.5,-1.92
+Siempre Ruta A,148,0,latencia_2,96.4,0.0,976.8,-1.89848
+Siempre Ruta A,149,0,latencia_2,104.9,0.0,972.2,-1.9258199999999999
+Siempre Ruta A,150,0,latencia_2,102.9,0.0,981.5,-1.9161000000000001
+Siempre Ruta A,151,0,latencia_2,102.5,0.0,962.9,-1.92234
+Siempre Ruta A,152,0,latencia_2,100.1,0.0,978.8,-1.90878
+Siempre Ruta A,153,0,latencia_2,102.0,0.0,960.1,-1.92196
+Siempre Ruta A,154,0,perdida_2,0.2,9.5,952.1,1.35174
+Siempre Ruta A,155,0,perdida_2,0.3,10.0,959.9,1.3530600000000002
+Siempre Ruta A,156,0,perdida_2,0.5,11.0,980.3,1.35762
+Siempre Ruta A,157,0,perdida_2,0.5,9.8,976.6,1.35974
+Siempre Ruta A,158,0,perdida_2,0.1,9.8,984.8,1.36422
+Siempre Ruta A,159,0,perdida_2,0.3,10.1,979.6,1.36064
+Siempre Ruta A,160,0,perdida_2,0.3,9.1,963.4,1.35716
+Siempre Ruta A,161,0,perdida_2,0.4,9.8,964.3,1.35512
+Siempre Ruta A,162,0,perdida_2,0.5,10.6,983.7,1.36018
+Siempre Ruta A,163,0,perdida_2,0.1,10.5,960.4,1.35236
+Siempre Ruta A,164,0,perdida_2,0.5,9.5,995.9,1.36836
+Siempre Ruta A,165,0,perdida_2,0.3,9.8,975.3,1.35982
+Siempre Ruta A,166,0,perdida_2,0.3,9.4,981.9,1.3636599999999999
+Siempre Ruta A,167,0,perdida_2,0.5,9.1,975.3,1.36132
+Siempre Ruta A,168,0,perdida_2,0.3,9.2,989.9,1.36746
+Siempre Ruta A,169,0,perdida_2,0.3,10.6,974.5,1.3571
+Siempre Ruta A,170,0,perdida_2,0.2,9.1,994.7,1.36998
+Siempre Ruta A,171,0,perdida_2,0.4,9.8,997.3,1.36832
+Siempre Ruta A,172,0,perdida_2,0.4,10.5,969.9,1.35526
+Siempre Ruta A,173,0,perdida_2,0.2,10.6,950.5,1.3478
+Siempre Ruta A,174,0,perdida_2,0.3,10.8,999.9,1.36666
+Siempre Ruta A,175,0,perdida_2,0.2,9.8,988.8,1.36552
+Siempre Ruta A,176,0,perdida_2,0.4,9.9,990.5,1.3653
+Siempre Ruta A,177,0,perdida_2,0.2,10.8,966.4,1.35356
+Siempre Ruta A,178,0,perdida_2,0.4,9.3,961.9,1.35566
+Siempre Ruta A,179,0,perdida_2,0.3,10.6,966.0,1.3537
+Siempre Ruta A,180,0,perdida_2,0.3,9.3,963.0,1.3564
+Siempre Ruta A,181,0,perdida_2,0.5,10.2,956.7,1.3505800000000001
+Siempre Ruta A,182,0,perdida_2,0.4,9.8,996.9,1.36816
+Siempre Ruta A,183,0,perdida_2,0.3,9.5,960.3,1.35472
+Siempre Ruta A,184,0,perdida_2,0.2,10.1,974.9,1.35906
+Siempre Ruta A,185,0,perdida_2,0.1,10.5,995.1,1.36624
+Siempre Ruta A,186,0,perdida_2,0.5,9.3,975.9,1.36096
+Siempre Ruta A,187,0,perdida_2,0.1,9.4,960.9,1.35586
+Siempre Ruta A,188,0,perdida_2,0.3,9.1,968.6,1.35924
+Siempre Ruta A,189,0,perdida_2,0.5,10.1,984.6,1.36204
+Siempre Ruta A,190,0,perdida_2,0.2,10.8,953.5,1.3484
+Siempre Ruta A,191,0,perdida_2,0.4,9.0,972.8,1.3609200000000001
+Siempre Ruta A,192,0,perdida_2,0.4,11.0,968.3,1.35312
+Siempre Ruta A,193,0,perdida_2,0.3,9.6,990.4,1.36646
+Siempre Ruta A,194,0,perdida_2,0.3,9.6,990.4,1.36646
+Siempre Ruta A,195,0,perdida_2,0.3,9.7,987.2,1.36488
+Siempre Ruta A,196,0,perdida_2,0.2,10.4,968.3,1.35552
+Siempre Ruta A,197,0,perdida_2,0.4,10.2,966.7,1.35488
+Siempre Ruta A,198,0,perdida_2,0.2,10.6,956.2,1.3500800000000002
+Siempre Ruta A,199,0,perdida_2,0.3,10.5,981.4,1.36016
+Siempre Ruta A,200,0,perdida_2,0.2,11.0,971.3,1.35492
+Siempre Ruta B,1,1,normal,0.3,0.0,973.4,1.38846
+Siempre Ruta B,2,1,normal,0.3,0.0,952.9,1.38026
+Siempre Ruta B,3,1,normal,0.5,0.0,971.8,1.3872200000000001
+Siempre Ruta B,4,1,normal,0.3,0.0,983.7,1.39258
+Siempre Ruta B,5,1,normal,0.1,0.0,958.9,1.38326
+Siempre Ruta B,6,1,normal,0.3,0.0,983.1,1.39234
+Siempre Ruta B,7,1,normal,0.4,0.0,984.6,1.39264
+Siempre Ruta B,8,1,normal,0.2,0.0,953.9,1.38096
+Siempre Ruta B,9,1,normal,0.3,0.0,971.8,1.38782
+Siempre Ruta B,10,1,normal,0.4,0.0,996.9,1.39756
+Siempre Ruta B,11,1,normal,0.4,0.0,978.2,1.39008
+Siempre Ruta B,12,1,normal,0.3,0.0,999.4,1.39886
+Siempre Ruta B,13,1,normal,0.2,0.0,998.6,1.39884
+Siempre Ruta B,14,1,normal,0.2,0.0,957.6,1.3824400000000001
+Siempre Ruta B,15,1,normal,0.4,0.0,974.5,1.3886
+Siempre Ruta B,16,1,normal,0.2,0.0,970.1,1.38744
+Siempre Ruta B,17,1,normal,0.5,0.0,984.3,1.39222
+Siempre Ruta B,18,1,normal,0.5,0.0,981.3,1.39102
+Siempre Ruta B,19,1,normal,0.5,0.0,986.2,1.39298
+Siempre Ruta B,20,1,normal,0.3,0.0,956.7,1.38178
+Siempre Ruta B,21,1,normal,0.1,0.0,978.5,1.3911
+Siempre Ruta B,22,1,normal,0.2,0.0,973.2,1.38868
+Siempre Ruta B,23,1,normal,0.1,0.0,960.8,1.38402
+Siempre Ruta B,24,1,normal,0.3,0.0,999.6,1.39894
+Siempre Ruta B,25,1,normal,0.3,0.0,989.5,1.3949
+Siempre Ruta B,26,1,normal,0.5,0.0,973.2,1.38778
+Siempre Ruta B,27,1,normal,0.5,0.0,990.0,1.3945
+Siempre Ruta B,28,1,normal,0.4,0.0,954.2,1.3804800000000002
+Siempre Ruta B,29,1,normal,0.2,0.0,972.3,1.38832
+Siempre Ruta B,30,1,normal,0.1,0.0,957.0,1.3825
+Siempre Ruta B,31,1,normal,0.3,0.0,970.1,1.38714
+Siempre Ruta B,32,1,normal,0.2,0.0,999.4,1.39916
+Siempre Ruta B,33,1,normal,0.1,0.0,964.7,1.38558
+Siempre Ruta B,34,1,normal,0.3,0.0,976.9,1.38986
+Siempre Ruta B,35,1,normal,0.4,0.0,985.0,1.3928
+Siempre Ruta B,36,1,normal,0.4,0.0,951.6,1.37944
+Siempre Ruta B,37,1,normal,0.1,0.0,978.9,1.39126
+Siempre Ruta B,38,1,normal,0.1,0.0,990.2,1.39578
+Siempre Ruta B,39,1,normal,0.5,0.0,981.0,1.3909
+Siempre Ruta B,40,1,normal,0.4,0.0,955.1,1.38084
+Siempre Ruta B,41,1,normal,0.3,0.0,981.4,1.39166
+Siempre Ruta B,42,1,normal,0.2,0.0,985.5,1.3936000000000002
+Siempre Ruta B,43,1,normal,0.4,0.0,964.1,1.3844400000000001
+Siempre Ruta B,44,1,normal,0.5,0.0,964.7,1.3843800000000002
+Siempre Ruta B,45,1,normal,0.2,0.0,996.3,1.39792
+Siempre Ruta B,46,1,normal,0.2,0.0,953.0,1.3806
+Siempre Ruta B,47,1,normal,0.2,0.0,968.3,1.38672
+Siempre Ruta B,48,1,normal,0.1,0.0,951.0,1.3801
+Siempre Ruta B,49,1,normal,0.2,0.0,995.5,1.3976000000000002
+Siempre Ruta B,50,1,normal,0.3,0.0,986.1,1.39354
+Siempre Ruta B,51,1,normal,0.4,0.0,998.3,1.39812
+Siempre Ruta B,52,1,normal,0.2,0.0,950.3,1.37952
+Siempre Ruta B,53,1,normal,0.3,0.0,976.8,1.38982
+Siempre Ruta B,54,1,normal,0.2,0.0,967.7,1.3864800000000002
+Siempre Ruta B,55,1,normal,0.2,0.0,985.2,1.39348
+Siempre Ruta B,56,1,normal,0.2,0.0,995.4,1.39756
+Siempre Ruta B,57,1,normal,0.2,0.0,980.9,1.39176
+Siempre Ruta B,58,1,normal,0.4,0.0,995.7,1.39708
+Siempre Ruta B,59,1,normal,0.1,0.0,966.2,1.38618
+Siempre Ruta B,60,1,normal,0.5,0.0,950.8,1.37882
+Siempre Ruta B,61,1,normal,0.4,0.0,964.3,1.38452
+Siempre Ruta B,62,1,normal,0.4,0.0,971.7,1.38748
+Siempre Ruta B,63,1,perdida_2,0.1,0.0,985.4,1.39386
+Siempre Ruta B,64,1,perdida_2,0.3,0.0,983.6,1.3925400000000001
+Siempre Ruta B,65,1,perdida_2,0.2,0.0,965.3,1.38552
+Siempre Ruta B,66,1,perdida_2,0.3,0.0,976.3,1.3896199999999999
+Siempre Ruta B,67,1,perdida_2,0.5,0.0,960.0,1.3825
+Siempre Ruta B,68,1,perdida_2,0.1,0.0,973.2,1.38898
+Siempre Ruta B,69,1,perdida_2,0.4,0.0,966.3,1.38532
+Siempre Ruta B,70,1,perdida_2,0.4,0.0,981.5,1.3914
+Siempre Ruta B,71,1,perdida_2,0.4,0.0,997.5,1.3978000000000002
+Siempre Ruta B,72,1,perdida_2,0.2,0.0,964.1,1.38504
+Siempre Ruta B,73,1,perdida_2,0.3,0.0,989.4,1.39486
+Siempre Ruta B,74,1,perdida_2,0.5,0.0,959.1,1.3821400000000001
+Siempre Ruta B,75,1,perdida_2,0.4,0.0,989.5,1.3946
+Siempre Ruta B,76,1,perdida_2,0.2,0.0,992.8,1.39652
+Siempre Ruta B,77,1,perdida_2,0.2,0.0,999.9,1.3993600000000002
+Siempre Ruta B,78,1,perdida_2,0.3,0.0,951.6,1.37974
+Siempre Ruta B,79,1,perdida_2,0.3,0.0,960.0,1.3831
+Siempre Ruta B,80,1,perdida_2,0.2,0.0,963.3,1.38472
+Siempre Ruta B,81,1,perdida_2,0.3,0.0,995.2,1.39718
+Siempre Ruta B,82,1,perdida_2,0.4,0.0,954.5,1.3806
+Siempre Ruta B,83,1,perdida_2,0.5,0.0,960.9,1.38286
+Siempre Ruta B,84,1,perdida_2,0.2,0.0,995.9,1.39776
+Siempre Ruta B,85,1,perdida_2,0.1,0.0,983.3,1.39302
+Siempre Ruta B,86,1,perdida_2,0.5,0.0,973.6,1.38794
+Siempre Ruta B,87,1,perdida_2,0.1,0.0,953.6,1.38114
+Siempre Ruta B,88,1,perdida_2,0.1,0.0,985.0,1.3937
+Siempre Ruta B,89,1,perdida_2,0.2,0.0,993.2,1.39668
+Siempre Ruta B,90,1,perdida_2,0.4,0.0,984.3,1.39252
+Siempre Ruta B,91,1,perdida_2,0.1,0.0,965.9,1.38606
+Siempre Ruta B,92,1,perdida_2,0.2,0.0,956.2,1.38188
+Siempre Ruta B,93,1,perdida_2,0.4,0.0,983.3,1.39212
+Siempre Ruta B,94,1,perdida_2,0.3,0.0,958.2,1.38238
+Siempre Ruta B,95,1,perdida_2,0.4,0.0,961.6,1.38344
+Siempre Ruta B,96,1,perdida_2,0.2,0.0,981.3,1.39192
+Siempre Ruta B,97,1,perdida_2,0.1,0.0,981.6,1.39234
+Siempre Ruta B,98,1,perdida_2,0.5,0.0,966.5,1.3851
+Siempre Ruta B,99,1,perdida_2,0.1,0.0,959.8,1.38362
+Siempre Ruta B,100,1,perdida_2,0.1,0.0,953.4,1.38106
+Siempre Ruta B,101,1,perdida_2,0.1,0.0,960.6,1.38394
+Siempre Ruta B,102,1,perdida_2,0.1,0.0,960.1,1.38374
+Siempre Ruta B,103,1,normal_3,0.1,0.0,980.8,1.39202
+Siempre Ruta B,104,1,normal_3,0.2,0.0,981.8,1.39212
+Siempre Ruta B,105,1,normal_3,0.5,0.0,955.1,1.38054
+Siempre Ruta B,106,1,normal_3,0.2,0.0,952.4,1.38036
+Siempre Ruta B,107,1,normal_3,0.3,0.0,994.2,1.3967800000000001
+Siempre Ruta B,108,1,normal_3,0.4,0.0,978.9,1.39036
+Siempre Ruta B,109,1,normal_3,0.4,0.0,966.2,1.38528
+Siempre Ruta B,110,1,normal_3,0.5,0.0,989.8,1.39442
+Siempre Ruta B,111,1,normal_3,0.3,0.0,971.5,1.3877
+Siempre Ruta B,112,1,normal_3,0.4,0.0,981.1,1.39124
+Siempre Ruta B,113,1,normal_3,0.2,0.0,996.0,1.3978000000000002
+Siempre Ruta B,114,1,normal_3,0.3,0.0,951.0,1.3795
+Siempre Ruta B,115,1,normal_3,0.1,0.0,980.5,1.3919000000000001
+Siempre Ruta B,116,1,normal_3,0.3,0.0,968.3,1.38642
+Siempre Ruta B,117,1,normal_3,0.3,0.0,979.8,1.39102
+Siempre Ruta B,118,1,normal_3,0.3,0.0,959.3,1.38282
+Siempre Ruta B,119,1,normal_3,0.4,0.0,996.7,1.39748
+Siempre Ruta B,120,1,normal_3,0.5,0.0,985.5,1.3927
+Siempre Ruta B,121,1,normal_3,0.4,0.0,974.4,1.38856
+Siempre Ruta B,122,1,normal_3,0.2,0.0,982.0,1.3922
+Siempre Ruta B,123,1,normal_3,0.2,0.0,962.2,1.38428
+Siempre Ruta B,124,1,normal_3,0.2,0.0,975.7,1.38968
+Siempre Ruta B,125,1,normal_3,0.2,0.0,997.6,1.39844
+Siempre Ruta B,126,1,normal_3,0.2,0.0,993.0,1.3966
+Siempre Ruta B,127,1,normal_3,0.2,0.0,991.3,1.39592
+Siempre Ruta B,128,1,normal_3,0.4,0.0,969.1,1.3864400000000001
+Siempre Ruta B,129,1,normal_3,0.3,0.0,986.7,1.39378
+Siempre Ruta B,130,1,normal_3,0.3,0.0,962.7,1.38418
+Siempre Ruta B,131,1,normal_3,0.3,0.0,965.0,1.3851
+Siempre Ruta B,132,1,normal_3,0.2,0.0,955.3,1.38152
+Siempre Ruta B,133,1,normal_3,0.3,0.0,988.6,1.3945400000000001
+Siempre Ruta B,134,1,normal_3,0.4,0.0,959.1,1.3824400000000001
+Siempre Ruta B,135,1,normal_3,0.2,0.0,982.2,1.39228
+Siempre Ruta B,136,1,normal_3,0.1,0.0,955.7,1.38198
+Siempre Ruta B,137,1,normal_3,0.1,0.0,982.7,1.3927800000000001
+Siempre Ruta B,138,1,normal_3,0.4,0.0,983.3,1.39212
+Siempre Ruta B,139,1,normal_3,0.2,0.0,998.7,1.3988800000000001
+Siempre Ruta B,140,1,normal_3,0.2,0.0,950.7,1.37968
+Siempre Ruta B,141,1,normal_3,0.1,0.0,991.0,1.3961000000000001
+Siempre Ruta B,142,1,normal_3,0.1,0.0,954.9,1.38166
+Siempre Ruta B,143,1,normal_3,0.2,0.0,990.4,1.3955600000000001
+Siempre Ruta B,144,1,normal_3,0.4,0.0,997.0,1.3976
+Siempre Ruta B,145,1,normal_3,0.4,0.0,960.5,1.383
+Siempre Ruta B,146,1,normal_3,0.3,0.0,965.2,1.38518
+Siempre Ruta B,147,1,normal_3,0.3,0.0,988.2,1.39438
+Siempre Ruta B,148,1,normal_3,0.2,0.0,994.8,1.3973200000000001
+Siempre Ruta B,149,1,normal_3,0.1,0.0,969.0,1.3873
+Siempre Ruta B,150,1,normal_3,0.5,0.0,983.2,1.39178
+Siempre Ruta B,151,1,normal_3,0.4,0.0,960.9,1.3831600000000002
+Siempre Ruta B,152,1,normal_3,0.1,0.0,982.3,1.39262
+Siempre Ruta B,153,1,normal_3,0.3,0.0,950.1,1.37914
+Siempre Ruta B,154,1,normal_3,0.2,0.0,964.6,1.38524
+Siempre Ruta B,155,1,normal_3,0.2,0.0,981.2,1.39188
+Siempre Ruta B,156,1,normal_3,0.1,0.0,962.6,1.3847399999999999
+Siempre Ruta B,157,1,normal_3,0.3,0.0,956.6,1.38174
+Siempre Ruta B,158,1,normal_3,0.3,0.0,974.2,1.3887800000000001
+Siempre Ruta B,159,1,normal_3,0.4,0.0,977.8,1.38992
+Siempre Ruta B,160,1,normal_3,0.2,0.0,989.8,1.39532
+Siempre Ruta B,161,1,normal_3,0.3,0.0,954.5,1.3809
+Siempre Ruta B,162,1,normal_3,0.3,0.0,989.4,1.39486
+Siempre Ruta B,163,1,normal_3,0.2,0.0,973.0,1.3886
+Siempre Ruta B,164,1,normal_3,0.5,0.0,956.4,1.38106
+Siempre Ruta B,165,1,normal_3,0.2,0.0,956.3,1.38192
+Siempre Ruta B,166,1,normal_3,0.3,0.0,987.5,1.3941
+Siempre Ruta B,167,1,normal_3,0.1,0.0,990.6,1.39594
+Siempre Ruta B,168,1,normal_3,0.5,0.0,960.6,1.38274
+Siempre Ruta B,169,1,normal_3,0.3,0.0,970.7,1.38738
+Siempre Ruta B,170,1,normal_3,0.4,0.0,982.6,1.39184
+Siempre Ruta B,171,1,normal_3,0.5,0.0,981.3,1.39102
+Siempre Ruta B,172,1,normal_3,0.2,0.0,970.9,1.38776
+Siempre Ruta B,173,1,perdida_2,0.5,0.0,966.3,1.38502
+Siempre Ruta B,174,1,perdida_2,0.4,0.0,977.9,1.38996
+Siempre Ruta B,175,1,perdida_2,0.3,0.0,996.4,1.3976600000000001
+Siempre Ruta B,176,1,perdida_2,0.2,0.0,961.4,1.38396
+Siempre Ruta B,177,1,perdida_2,0.4,0.0,962.1,1.38364
+Siempre Ruta B,178,1,perdida_2,0.5,0.0,976.3,1.38902
+Siempre Ruta B,179,1,perdida_2,0.4,0.0,978.3,1.39012
+Siempre Ruta B,180,1,perdida_2,0.4,0.0,958.3,1.38212
+Siempre Ruta B,181,1,perdida_2,0.4,0.0,997.5,1.3978000000000002
+Siempre Ruta B,182,1,perdida_2,0.1,0.0,999.8,1.39962
+Siempre Ruta B,183,1,perdida_2,0.4,0.0,956.3,1.38132
+Siempre Ruta B,184,1,perdida_2,0.5,0.0,995.3,1.39662
+Siempre Ruta B,185,1,perdida_2,0.5,0.0,999.1,1.3981400000000002
+Siempre Ruta B,186,1,perdida_2,0.2,0.0,987.4,1.39436
+Siempre Ruta B,187,1,perdida_2,0.1,0.0,989.9,1.39566
+Siempre Ruta B,188,1,perdida_2,0.3,0.0,982.8,1.39222
+Siempre Ruta B,189,1,perdida_2,0.3,0.0,954.1,1.38074
+Siempre Ruta B,190,1,perdida_2,0.3,0.0,968.4,1.38646
+Siempre Ruta B,191,1,perdida_2,0.1,0.0,978.6,1.39114
+Siempre Ruta B,192,1,perdida_2,0.1,0.0,991.1,1.39614
+Siempre Ruta B,193,1,perdida_2,0.4,0.0,973.8,1.38832
+Siempre Ruta B,194,1,perdida_2,0.2,0.0,953.8,1.38092
+Siempre Ruta B,195,1,perdida_2,0.4,0.0,959.7,1.3826800000000001
+Siempre Ruta B,196,1,perdida_2,0.3,0.0,951.1,1.37954
+Siempre Ruta B,197,1,perdida_2,0.3,0.0,960.5,1.3833
+Siempre Ruta B,198,1,perdida_2,0.2,0.0,951.4,1.37996
+Siempre Ruta B,199,1,perdida_2,0.3,0.0,997.6,1.39814
+Siempre Ruta B,200,1,perdida_2,0.2,0.0,965.3,1.38552
