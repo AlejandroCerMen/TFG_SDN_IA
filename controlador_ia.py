@@ -26,7 +26,7 @@ class RedSdnEnv(gym.Env):
         self.estado_actual  = np.zeros(6, dtype=np.float32)
 
         # Sesión HTTP persistente: reutiliza la conexión TCP entre peticiones,
-        # evitando el handshake TCP por cada paso y triplicando el fps de entrenamiento.
+        # evitando el handshake TCP por cada paso.
         self.session = requests.Session()
 
     def reset(self, seed=None, options=None):
@@ -43,18 +43,24 @@ class RedSdnEnv(gym.Env):
             self.pasos_actuales = 0
             self.proximo_cambio = random.randint(30, 80)
 
-        # 2. ENVIAR ACCIÓN A RYU
+        # 2. ENVIAR ACCIÓN A RYU (síncrono — Session reutiliza la conexión TCP)
         try:
             self.session.post('http://127.0.0.1:8080/ia/rutas',
                               json={"accion": int(action)}, timeout=1)
         except Exception as e:
             print(f"Error enviando orden a Ryu: {e}")
 
-        # Esperamos a que el telemetry agent (hub.sleep=0.05s) complete al menos
-        # un ciclo completo de lectura antes de consultar las métricas.
+        # 3. SLEEP MÍNIMO PARA EL TELEMETRY AGENT
+        # El agente de Ryu (hub.sleep=0.05s) actualiza las métricas cada 50ms.
+        # Con 0.05s garantizamos al menos un ciclo completo antes del GET.
         time.sleep(0.05)
 
-        # 3. LEER MÉTRICAS DESDE RYU
+        # Log de progreso cada 10 pasos para confirmar actividad entre tablas
+        if self.pasos_actuales % 10 == 0:
+            faltan = self.proximo_cambio - self.pasos_actuales
+            print(f"  [·] paso {self.pasos_actuales} — siguiente escenario en {faltan} pasos")
+
+        # 4. LEER MÉTRICAS DESDE RYU
         try:
             respuesta = self.session.get('http://127.0.0.1:8080/ia/metricas', timeout=1)
             datos = respuesta.json()
@@ -65,19 +71,24 @@ class RedSdnEnv(gym.Env):
         except Exception as e:
             print(f"Error conectando con Ryu: {e}")
 
-        # 4. CALCULAR RECOMPENSA
+        # 5. CALCULAR RECOMPENSA
         if action == 0:
-            lat_elegida, loss_elegida, bw_elegida = self.estado_actual[0], self.estado_actual[1], self.estado_actual[2]
+            lat_elegida, loss_elegida, bw_elegida = (
+                self.estado_actual[0], self.estado_actual[1], self.estado_actual[2])
             lat_otra = self.estado_actual[3]
         else:
-            lat_elegida, loss_elegida, bw_elegida = self.estado_actual[3], self.estado_actual[4], self.estado_actual[5]
+            lat_elegida, loss_elegida, bw_elegida = (
+                self.estado_actual[3], self.estado_actual[4], self.estado_actual[5])
             lat_otra = self.estado_actual[0]
 
         # Recompensa base normalizada (rango ~[-1, 1])
-        recompensa = (0.4 * bw_elegida / 1000.0) - (0.3 * lat_elegida / 100.0) - (0.3 * loss_elegida / 100.0)
+        recompensa = (
+            (0.4 * bw_elegida   / 1000.0) -
+            (0.3 * lat_elegida  /  100.0) -
+            (0.3 * loss_elegida /  100.0)
+        )
 
-        # Castigo/premio contextual — distingue tres situaciones para no penalizar
-        # a la IA cuando ambas rutas están mal y no tiene opción mejor.
+        # Castigo/premio contextual
         ruta_elegida_mala = lat_elegida >= 50.0
         ruta_otra_mala    = lat_otra    >= 50.0
 
@@ -93,7 +104,7 @@ class RedSdnEnv(gym.Env):
     def _aplicar_congestion_aleatoria(self):
         """
         Generador de Caos: inyecta escenarios de red usando tc (Traffic Control de Linux).
-        Cubre los 4 escenarios documentados: normal, latencia, pérdida y congestión.
+        Cubre los 4 escenarios: normal, latencia, pérdida y congestión.
         """
         os.system("sudo tc qdisc del dev s1-eth2 root 2>/dev/null")
         os.system("sudo tc qdisc del dev s1-eth3 root 2>/dev/null")
