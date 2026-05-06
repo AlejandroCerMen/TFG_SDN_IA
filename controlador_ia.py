@@ -13,17 +13,25 @@ class RedSdnEnv(gym.Env):
     def __init__(self):
         super(RedSdnEnv, self).__init__()
 
-        # Acción 0: Ruta A (s1->s2->s4) | Acción 1: Ruta B (s1->s3->s4)
-        self.action_space = spaces.Discrete(2)
+        # Acción 0..3: 4 caminos posibles entre los hosts principales
+        self.action_space = spaces.Discrete(4)
 
-        # Estado: [Latencia_A, Perdida_A, BW_A, Latencia_B, Perdida_B, BW_B]
-        limites_bajos = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32)
-        limites_altos = np.array([1000.0, 100.0, 1000.0, 1000.0, 100.0, 1000.0], dtype=np.float32)
+        # Estado: 6 enlaces clave x 3 métricas (latencia, pérdida, ancho de banda)
+        limites_bajos = np.array([0.0] * 18, dtype=np.float32)
+        limites_altos = np.array([1000.0, 100.0, 1000.0] * 6, dtype=np.float32)
         self.observation_space = spaces.Box(low=limites_bajos, high=limites_altos, dtype=np.float32)
 
         self.pasos_actuales = 0
         self.proximo_cambio = random.randint(30, 80)
-        self.estado_actual  = np.zeros(6, dtype=np.float32)
+        self.estado_actual = np.zeros(18, dtype=np.float32)
+
+        # Mapas de ruta para calcular la recompensa por acción
+        self.ruta_enlaces = {
+            0: [0, 1, 2],
+            1: [3, 4, 5],
+            2: [0, 3, 4],
+            3: [1, 2, 5],
+        }
 
         # Sesión HTTP persistente: reutiliza la conexión TCP entre peticiones,
         # evitando el handshake TCP por cada paso.
@@ -31,7 +39,7 @@ class RedSdnEnv(gym.Env):
 
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
-        self.estado_actual = np.array([10.0, 0.0, 100.0, 10.0, 0.0, 100.0], dtype=np.float32)
+        self.estado_actual = np.array([10.0, 0.0, 100.0] * 6, dtype=np.float32)
         return self.estado_actual, {}
 
     def step(self, action):
@@ -45,7 +53,7 @@ class RedSdnEnv(gym.Env):
 
         # 2. ENVIAR ACCIÓN A RYU (síncrono — Session reutiliza la conexión TCP)
         try:
-            self.session.post('http://127.0.0.1:8080/ia/rutas',
+            self.session.post('http://127.0.0.1:8080/ia/ruta_dinamica',
                               json={"accion": int(action)}, timeout=1)
         except Exception as e:
             print(f"Error enviando orden a Ryu: {e}")
@@ -60,26 +68,29 @@ class RedSdnEnv(gym.Env):
             faltan = self.proximo_cambio - self.pasos_actuales
             print(f"  [·] paso {self.pasos_actuales} — siguiente escenario en {faltan} pasos")
 
-        # 4. LEER MÉTRICAS DESDE RYU
+        # 4. LEER MÉTRICAS DESDE RYU para 6 enlaces clave
         try:
             respuesta = self.session.get('http://127.0.0.1:8080/ia/metricas', timeout=1)
             datos = respuesta.json()
             self.estado_actual = np.array([
-                float(datos['latencia_A']), float(datos['perdida_A']), float(datos['bw_A']),
-                float(datos['latencia_B']), float(datos['perdida_B']), float(datos['bw_B']),
+                float(datos['latencia_1']), float(datos['perdida_1']), float(datos['bw_1']),
+                float(datos['latencia_2']), float(datos['perdida_2']), float(datos['bw_2']),
+                float(datos['latencia_3']), float(datos['perdida_3']), float(datos['bw_3']),
+                float(datos['latencia_4']), float(datos['perdida_4']), float(datos['bw_4']),
+                float(datos['latencia_5']), float(datos['perdida_5']), float(datos['bw_5']),
+                float(datos['latencia_6']), float(datos['perdida_6']), float(datos['bw_6']),
             ], dtype=np.float32)
         except Exception as e:
             print(f"Error conectando con Ryu: {e}")
 
-        # 5. CALCULAR RECOMPENSA
-        if action == 0:
-            lat_elegida, loss_elegida, bw_elegida = (
-                self.estado_actual[0], self.estado_actual[1], self.estado_actual[2])
-            lat_otra = self.estado_actual[3]
-        else:
-            lat_elegida, loss_elegida, bw_elegida = (
-                self.estado_actual[3], self.estado_actual[4], self.estado_actual[5])
-            lat_otra = self.estado_actual[0]
+        # 5. CALCULAR RECOMPENSA usando el conjunto de enlaces de la acción seleccionada
+        enlaces = self.ruta_enlaces.get(int(action), [0, 1, 2])
+        lat_elegida = np.mean([self.estado_actual[idx * 3 + 0] for idx in enlaces])
+        loss_elegida = np.mean([self.estado_actual[idx * 3 + 1] for idx in enlaces])
+        bw_elegida = np.mean([self.estado_actual[idx * 3 + 2] for idx in enlaces])
+
+        otras_rutas = [r for a, r in self.ruta_enlaces.items() if a != int(action)]
+        lat_otra = min(np.mean([self.estado_actual[idx * 3 + 0] for idx in ruta]) for ruta in otras_rutas)
 
         # Recompensa base normalizada (rango ~[-1, 1])
         recompensa = (

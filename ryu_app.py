@@ -38,6 +38,35 @@ class TFG_RyuController(app_manager.RyuApp):
             'bw_B': 1000.0
         }
 
+        # Mapeos para topología dinámica
+        self.ip_to_mac = {
+            '10.0.0.1': '00:00:00:00:00:01',
+            '10.0.0.2': '00:00:00:00:00:02',
+            '10.0.0.3': '00:00:00:00:00:03',
+            '10.0.0.4': '00:00:00:00:00:04',
+            '10.0.0.5': '00:00:00:00:00:05',
+            '10.0.0.6': '00:00:00:00:00:06',
+        }
+        self.mac_to_ip = {v: k for k, v in self.ip_to_mac.items()}
+        self.host_locations = {
+            '10.0.0.1': 3, '10.0.0.2': 3,
+            '10.0.0.3': 4, '10.0.0.4': 4,
+            '10.0.0.5': 5, '10.0.0.6': 5,
+        }
+        self.host_ports = {
+            '10.0.0.1': 1, '10.0.0.2': 2,
+            '10.0.0.3': 1, '10.0.0.4': 2,
+            '10.0.0.5': 1, '10.0.0.6': 2,
+        }
+        self.switch_ports = {
+            (3,1): 3, (1,3): 1,
+            (3,2): 4, (2,3): 1,
+            (4,1): 3, (1,4): 2,
+            (4,2): 4, (2,4): 2,
+            (5,1): 3, (1,5): 3,
+            (5,2): 4, (2,5): 3,
+        }
+
         # Registrar la API Web
         wsgi = kwargs['wsgi']
         wsgi.register(IA_API_Controller, {ia_instance_name: self})
@@ -122,42 +151,127 @@ class TFG_RyuController(app_manager.RyuApp):
                                 match=match, instructions=inst)
         datapath.send_msg(mod)
 
-    #@set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
+    @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
+    def _packet_in_handler(self, ev):
+        """
+        Maneja los paquetes que los switches no saben enrutar.
+        Evita tormentas de broadcast instalando rutas dinámicas vía Spine-1.
+        """
+        msg = ev.msg
+        datapath = msg.datapath
+        ofproto = datapath.ofproto
+        parser = datapath.ofproto_parser
+        in_port = msg.match['in_port']
 
-    def cambiar_ruta(self, accion):
-        print(f"\n[!] ORDEN IA: Ruta {'A' if accion == 0 else 'B'}")
+        pkt = packet.Packet(msg.data)
+        eth = pkt.get_protocols(ethernet.ethernet)[0]
 
-        dp1 = self.datapaths.get(1)
-        dp2 = self.datapaths.get(2)
-        dp3 = self.datapaths.get(3)
-        dp4 = self.datapaths.get(4)
+        # 1. IGNORAR PAQUETES LLDP (descubrimiento de topología del controlador)
+        if eth.ethertype == ether_types.ETH_TYPE_LLDP:
+            return
+
+        # 2. IGNORAR PAQUETES DE BROADCAST para evitar bucles
+        if eth.dst == 'ff:ff:ff:ff:ff:ff':
+            return
+
+        dst_mac = eth.dst
+        src_mac = eth.src
+
+        # 3. MAPEAR MACs A IPs y VALIDAR que sean hosts conocidos
+        src_ip = self.mac_to_ip.get(src_mac)
+        dst_ip = self.mac_to_ip.get(dst_mac)
+
+        # Si no sabemos de dónde o hacia dónde va el paquete, lo descartamos
+        if not src_ip or not dst_ip:
+            return
+
+        # 4. CALCULAR RUTA PREDETERMINADA: desde Leaf de origen -> Spine1 -> Leaf de destino
+        src_leaf = self.host_locations.get(src_ip)
+        dst_leaf = self.host_locations.get(dst_ip)
+
+        if not src_leaf or not dst_leaf:
+            return
+
+        # Evitar bucles: si el origen y destino están en el mismo Leaf, tráfico local
+        if src_leaf == dst_leaf:
+            dpid_path = [src_leaf]
+        else:
+            # Ruta inter-rack: src_leaf -> Spine1 (dpid 1) -> dst_leaf
+            dpid_path = [src_leaf, 1, dst_leaf]
+
+        # 5. INSTALAR LA RUTA DINÁMICA
+        self.instalar_ruta_dinamica(dpid_path, src_ip, dst_ip)
         
-        if not all([dp1, dp2, dp3, dp4]): return
+        print(f"[!] PacketIn: {src_mac} ({src_ip}) -> {dst_mac} ({dst_ip})")
+        print(f"    Ruta automática instalada: {dpid_path}")
 
-        h1_mac = "00:00:00:00:00:01"
-        h2_mac = "00:00:00:00:00:02"
+        # 6. ENVIAR EL PRIMER PAQUETE al destino (no usar OFPP_FLOOD)
+        # Determinamos el puerto de salida basado en la ruta
+        if len(dpid_path) > 1:
+            next_dpid = dpid_path[1]
+            out_port = self.switch_ports.get((src_leaf, next_dpid))
+        else:
+            out_port = self.host_ports.get(dst_ip)
 
-        # --- REGLAS SEGÚN TU TOPOLOGÍA REAL ---
-        
-        # S1: h1 está en puerto 1. s2 en puerto 2. s3 en puerto 3.
-        self.add_flow(dp1, 10, dp1.ofproto_parser.OFPMatch(eth_dst=h2_mac), [dp1.ofproto_parser.OFPActionOutput(2 if accion == 0 else 3)])
-        self.add_flow(dp1, 10, dp1.ofproto_parser.OFPMatch(eth_dst=h1_mac), [dp1.ofproto_parser.OFPActionOutput(1)])
+        if out_port is None:
+            # Si no encontramos puerto, descartamos el paquete
+            return
 
-        # S2 (Ruta A): s1 está en puerto 1. s4 en puerto 2.
-        self.add_flow(dp2, 10, dp2.ofproto_parser.OFPMatch(eth_dst=h2_mac), [dp2.ofproto_parser.OFPActionOutput(2)])
-        self.add_flow(dp2, 10, dp2.ofproto_parser.OFPMatch(eth_dst=h1_mac), [dp2.ofproto_parser.OFPActionOutput(1)])
+        actions = [parser.OFPActionOutput(out_port)]
+        data = None
+        if msg.buffer_id == ofproto.OFP_NO_BUFFER:
+            data = msg.data
 
-        # S3 (Ruta B): s1 está en puerto 1. s4 en puerto 2.
-        self.add_flow(dp3, 10, dp3.ofproto_parser.OFPMatch(eth_dst=h2_mac), [dp3.ofproto_parser.OFPActionOutput(2)])
-        self.add_flow(dp3, 10, dp3.ofproto_parser.OFPMatch(eth_dst=h1_mac), [dp3.ofproto_parser.OFPActionOutput(1)])
+        out = parser.OFPPacketOut(datapath=datapath, buffer_id=msg.buffer_id,
+                                  in_port=in_port, actions=actions, data=data)
+        datapath.send_msg(out)
 
-        # S4: h2 está en puerto 1 (según tu comando net). s2 en puerto 2. s3 en puerto 3.
-        # Ida hacia h2: siempre al puerto 1
-        self.add_flow(dp4, 10, dp4.ofproto_parser.OFPMatch(eth_dst=h2_mac), [dp4.ofproto_parser.OFPActionOutput(1)])
-        # Vuelta hacia h1: puerto 2 si venimos por s2 (Accion 0), puerto 3 si venimos por s3 (Accion 1)
-        self.add_flow(dp4, 10, dp4.ofproto_parser.OFPMatch(eth_dst=h1_mac), [dp4.ofproto_parser.OFPActionOutput(2 if accion == 0 else 3)])
+    def instalar_ruta_dinamica(self, dpid_path, ip_src, ip_dst):
+        """
+        Instala reglas OpenFlow dinámicamente para una ruta dada.
+        dpid_path: lista de DPIDs (ej: [3, 1, 4])
+        ip_src, ip_dst: IPs de origen y destino
+        Instala reglas para ambas direcciones.
+        """
+        src_mac = self.ip_to_mac[ip_src]
+        dst_mac = self.ip_to_mac[ip_dst]
 
-        print("    [V] ¡Puertos corregidos y ruta inyectada!")
+        # Forward path: src -> dst
+        for i in range(len(dpid_path)):
+            current_dpid = dpid_path[i]
+            datapath = self.datapaths.get(current_dpid)
+            if not datapath:
+                continue
+            if i < len(dpid_path) - 1:
+                next_dpid = dpid_path[i+1]
+                port = self.switch_ports.get((current_dpid, next_dpid))
+            else:
+                port = self.host_ports.get(ip_dst)
+            if port is None:
+                continue
+            match = datapath.ofproto_parser.OFPMatch(eth_dst=dst_mac)
+            actions = [datapath.ofproto_parser.OFPActionOutput(port)]
+            self.add_flow(datapath, 10, match, actions)
+
+        # Backward path: dst -> src
+        reverse_path = dpid_path[::-1]
+        for i in range(len(reverse_path)):
+            current_dpid = reverse_path[i]
+            datapath = self.datapaths.get(current_dpid)
+            if not datapath:
+                continue
+            if i < len(reverse_path) - 1:
+                next_dpid = reverse_path[i+1]
+                port = self.switch_ports.get((current_dpid, next_dpid))
+            else:
+                port = self.host_ports.get(ip_src)
+            if port is None:
+                continue
+            match = datapath.ofproto_parser.OFPMatch(eth_dst=src_mac)
+            actions = [datapath.ofproto_parser.OFPActionOutput(port)]
+            self.add_flow(datapath, 10, match, actions)
+
+        print(f"[!] Ruta dinámica instalada: {dpid_path} para {ip_src} -> {ip_dst}")
 
 class IA_API_Controller(ControllerBase):
     """
@@ -183,14 +297,24 @@ class IA_API_Controller(ControllerBase):
     def set_ruta(self, req, **kwargs):
         """
         Recibe la acción elegida por la IA (0 o 1) vía HTTP POST.
+        Instala la ruta dinámica correspondiente.
         """
         try:
             # Leemos el JSON que nos manda la IA
             datos = req.json if req.body else {}
             accion = int(datos.get('accion', 0))
             
-            # Avisamos al controlador principal para que cambie las reglas
-            self.ryu_app.cambiar_ruta(accion)
+            # Definir rutas basadas en acción (ejemplo: Ruta A [3,1,4], Ruta B [3,2,4])
+            if accion == 0:
+                dpid_path = [3, 1, 4]  # Leaf3 -> Spine1 -> Leaf4
+            else:
+                dpid_path = [3, 2, 4]  # Leaf3 -> Spine2 -> Leaf4
+            
+            ip_src = '10.0.0.1'  # h1
+            ip_dst = '10.0.0.2'  # h2
+            
+            # Avisamos al controlador principal para que instale la ruta dinámica
+            self.ryu_app.instalar_ruta_dinamica(dpid_path, ip_src, ip_dst)
             
             respuesta_ok = json.dumps({"status": "ok"})
             # SOLUCIÓN: Encode a utf-8
