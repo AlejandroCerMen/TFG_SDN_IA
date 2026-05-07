@@ -112,11 +112,11 @@ class RedSdnEnv(gym.Env):
         ruta_otra_mala    = lat_otra    >= 50.0
 
         if ruta_elegida_mala and not ruta_otra_mala:
-            recompensa -= 2.0   # Eligió la mala habiendo una buena disponible
+            recompensa -= 1.0   # Eligió la mala habiendo una buena disponible
         elif ruta_elegida_mala and ruta_otra_mala:
             recompensa -= 0.2   # Ambas malas: castigo leve
         else:
-            recompensa += 1.0   # Eligió correctamente
+            recompensa += 0.5   # Eligió correctamente
 
         return self.estado_actual, float(recompensa), False, False, {}
 

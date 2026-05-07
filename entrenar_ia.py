@@ -44,20 +44,25 @@ model = PPO(
     "MlpPolicy",
     env,
     verbose=1,
-    n_steps=512,
-    batch_size=64,
+    n_steps=2048,        # era 512 — más contexto por actualización
+    batch_size=128,      # escalar con n_steps (2048/128 = 16 mini-batches)
     n_epochs=10,
-    learning_rate=3e-4,
-    ent_coef=0.05,
-    vf_coef=0.75,
+    learning_rate=1e-4,  # era 3e-4 — bajar para estabilidad
+    ent_coef=0.01,       # era 0.05 — menos exploración, ya ha explorado suficiente
+    vf_coef=0.5,         # era 0.75 — equilibrar con el policy gradient
     clip_range=0.2,
+    gamma=0.95,          # NUEVO — descuento más corto para env ruidoso
+    gae_lambda=0.90,     # NUEVO — reduce la varianza del estimador de ventaja
+    policy_kwargs=dict(
+        net_arch=dict(pi=[128, 128], vf=[128, 128])  # red más grande para 18D
+    ),
     tensorboard_log="./logs_tfg/"
 )
 
 # 3. Lanzar el entrenamiento
 print("Iniciando entrenamiento...")
 print("Topología: Spine-Leaf 3Leaf+2Spine, 4 rutas dinámicas, 18D estado")
-model.learn(total_timesteps=100000)
+model.learn(total_timesteps=300_000)
 
 # 4. Guardar el modelo y las estadísticas de normalización
 #    IMPORTANTE: VecNormalize guarda la media y varianza aprendidas.
