@@ -53,10 +53,16 @@ class RedSdnEnv(gym.Env):
             self.pasos_actuales = 0
             self.proximo_cambio = random.randint(30, 80)
 
-        # 2. ENVIAR ACCIÓN A RYU (síncrono — Session reutiliza la conexión TCP)
+        # 2. VALIDAR Y ENVIAR ACCIÓN A RYU (síncrono — Session reutiliza la conexión TCP)
         try:
+            accion_valida = int(action)
+            if accion_valida < 0:
+                accion_valida = 0
+            elif accion_valida >= self.action_space.n:
+                accion_valida = self.action_space.n - 1
+
             self.session.post('http://127.0.0.1:8080/ia/ruta_dinamica',
-                              json={"accion": int(action)}, timeout=1)
+                              json={"accion": accion_valida}, timeout=1)
         except Exception as e:
             print(f"Error enviando orden a Ryu: {e}")
 

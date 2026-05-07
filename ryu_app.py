@@ -300,24 +300,36 @@ class IA_API_Controller(ControllerBase):
     @route('ia_api_ruta_dinamica', '/ia/ruta_dinamica', methods=['POST'])
     def set_ruta_dinamica(self, req, **kwargs):
         """
-        Recibe la acción elegida por la IA e instala la ruta dinámica para controlar
-        el flujo TCP pesado de h1 (10.0.0.1) a h4 (10.0.0.4).
-        - Acción 0: ruta por Spine 1 [3, 1, 4]
-        - Acción 1: ruta por Spine 2 [3, 2, 4]
+        Recibe la acción elegida por la IA e instala rutas dinámicas para dos flujos:
+        - TCP h1 (10.0.0.1) -> h4 (10.0.0.4)
+        - Vídeo UDP h3 (10.0.0.3) -> h6 (10.0.0.6)
         """
         try:
             datos = req.json if req.body else {}
             accion = int(datos.get('accion', 0))
 
             rutas_accion = {
-                0: {'dpid_path': [3, 1, 4]},
-                1: {'dpid_path': [3, 2, 4]},
+                0: {
+                    'dpid_path_tcp': [3, 1, 4],
+                    'dpid_path_udp': [4, 1, 5],
+                },
+                1: {
+                    'dpid_path_tcp': [3, 1, 4],
+                    'dpid_path_udp': [4, 2, 5],
+                },
+                2: {
+                    'dpid_path_tcp': [3, 2, 4],
+                    'dpid_path_udp': [4, 1, 5],
+                },
+                3: {
+                    'dpid_path_tcp': [3, 2, 4],
+                    'dpid_path_udp': [4, 2, 5],
+                },
             }
             ruta = rutas_accion.get(accion, rutas_accion[0])
 
-            ip_src = '10.0.0.1'
-            ip_dst = '10.0.0.4'
-            self.ryu_app.instalar_ruta_dinamica(ruta['dpid_path'], ip_src, ip_dst)
+            self.ryu_app.instalar_ruta_dinamica(ruta['dpid_path_tcp'], '10.0.0.1', '10.0.0.4')
+            self.ryu_app.instalar_ruta_dinamica(ruta['dpid_path_udp'], '10.0.0.3', '10.0.0.6')
 
             respuesta_ok = json.dumps({"status": "ok"})
             return Response(content_type='application/json', body=respuesta_ok.encode('utf-8'))
