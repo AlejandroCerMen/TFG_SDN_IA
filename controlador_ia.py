@@ -5,6 +5,7 @@ import requests
 import random
 import time
 import os
+import subprocess
 
 class RedSdnEnv(gym.Env):
     """
@@ -12,6 +13,13 @@ class RedSdnEnv(gym.Env):
     """
     def __init__(self):
         super(RedSdnEnv, self).__init__()
+
+        # Verificar que sudo funciona sin password (necesario para tc)
+        try:
+            subprocess.run("sudo -n true", shell=True, check=True,
+                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        except subprocess.CalledProcessError:
+            print("ADVERTENCIA: sudo requiere contraseña. Ejecuta 'sudo -v' o configura NOPASSWD.")
 
         # Acción 0..3: 4 caminos posibles entre los hosts principales
         self.action_space = spaces.Discrete(4)
@@ -28,11 +36,28 @@ class RedSdnEnv(gym.Env):
         # Mapas de ruta para calcular la recompensa por acción.
         # Las métricas se basan en 6 enlaces Spine-Leaf:
         # 0 = s3->s1, 1 = s3->s2, 2 = s4->s1, 3 = s4->s2, 4 = s5->s1, 5 = s5->s2.
-        self.ruta_enlaces = {
-            0: [0, 2],  # h1->h4 via s3-s1 and s4-s1
-            1: [1, 3],  # h1->h4 via s3-s2 and s4-s2
-            2: [0, 4],  # h1->h6 via s3-s1 and s5-s1
-            3: [1, 5],  # h1->h6 via s3-s2 and s5-s2
+        # Las acciones afectan tanto al flujo TCP (h1->h4), UDP Video (h3->h6), y UDP VoIP (h5->h2):
+        # Acción 0: TCP via s1 (links 0,2), Video via s1 (links 2,4), VoIP via s1 (links 4,0)
+        # Acción 1: TCP via s1 (links 0,2), Video via s2 (links 3,5), VoIP via s1 (links 4,0)
+        # Acción 2: TCP via s2 (links 1,3), Video via s1 (links 2,4), VoIP via s2 (links 5,1)
+        # Acción 3: TCP via s2 (links 1,3), Video via s2 (links 3,5), VoIP via s2 (links 5,1)
+        self.ruta_enlaces_tcp = {
+            0: [0, 2],
+            1: [0, 2],
+            2: [1, 3],
+            3: [1, 3],
+        }
+        self.ruta_enlaces_video = {
+            0: [2, 4],
+            1: [3, 5],
+            2: [2, 4],
+            3: [3, 5],
+        }
+        self.ruta_enlaces_voip = {
+            0: [4, 0],
+            1: [4, 0],
+            2: [5, 1],
+            3: [5, 1],
         }
 
         # Sesión HTTP persistente: reutiliza la conexión TCP entre peticiones,
@@ -64,7 +89,8 @@ class RedSdnEnv(gym.Env):
 
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
-        self.estado_actual = np.array([10.0, 0.0, 100.0] * 6, dtype=np.float32)
+        # Estado inicial coherente con Ryu (lat=0.1ms, loss=0%, bw=1000Mbps)
+        self.estado_actual = np.array([0.1, 0.0, 1000.0] * 6, dtype=np.float32)
         return self.estado_actual, {}
 
     def step(self, action):
@@ -90,8 +116,8 @@ class RedSdnEnv(gym.Env):
 
         # 3. SLEEP MÍNIMO PARA EL TELEMETRY AGENT
         # El agente de Ryu (hub.sleep=0.05s) actualiza las métricas cada 50ms.
-        # Con 0.03s garantizamos al menos un ciclo completo antes del GET.
-        time.sleep(0.03)
+        # Con 0.06s garantizamos al menos un ciclo completo antes del GET.
+        time.sleep(0.06)
 
         # Log de progreso cada 10 pasos para confirmar actividad entre tablas
         if self.pasos_actuales % 10 == 0:
@@ -111,28 +137,70 @@ class RedSdnEnv(gym.Env):
             ], dtype=np.float32)
         # si datos es None, se reutiliza self.estado_actual del paso anterior
 
-        # 5. CALCULAR RECOMPENSA usando el conjunto de enlaces de la acción seleccionada
-        enlaces = self.ruta_enlaces.get(int(action), [0, 1, 2])
-        lat_elegida = np.mean([self.estado_actual[idx * 3 + 0] for idx in enlaces])
-        loss_elegida = np.mean([self.estado_actual[idx * 3 + 1] for idx in enlaces])
-        bw_elegida = np.mean([self.estado_actual[idx * 3 + 2] for idx in enlaces])
+        # 5. CALCULAR RECOMPENSA usando los enlaces de TCP, Video y VoIP de la acción
+        accion_int = int(action)
 
-        otras_rutas = [r for a, r in self.ruta_enlaces.items() if a != int(action)]
-        lat_otra = min(np.mean([self.estado_actual[idx * 3 + 0] for idx in ruta]) for ruta in otras_rutas)
+        # TCP (h1->h4) - Flujo elefante: sensible a BW, moderado a latencia/pérdida
+        enlaces_tcp = self.ruta_enlaces_tcp.get(accion_int, [0, 2])
+        lat_tcp = np.mean([self.estado_actual[idx * 3 + 0] for idx in enlaces_tcp])
+        loss_tcp = np.mean([self.estado_actual[idx * 3 + 1] for idx in enlaces_tcp])
+        bw_tcp = np.mean([self.estado_actual[idx * 3 + 2] for idx in enlaces_tcp])
 
-        # Recompensa base normalizada (rango ~[-1, 1])
-        recompensa = (
-            (0.4 * bw_elegida   / 1000.0) -
-            (0.3 * lat_elegida  /  100.0) -
-            (0.3 * loss_elegida /  100.0)
+        # Video UDP (h3->h6) - Sensible a jitter y BW, moderado a latencia/pérdida
+        enlaces_video = self.ruta_enlaces_video.get(accion_int, [2, 4])
+        lat_video = np.mean([self.estado_actual[idx * 3 + 0] for idx in enlaces_video])
+        loss_video = np.mean([self.estado_actual[idx * 3 + 1] for idx in enlaces_video])
+        bw_video = np.mean([self.estado_actual[idx * 3 + 2] for idx in enlaces_video])
+
+        # VoIP UDP (h5->h2) - MUY sensible a jitter/latencia, BW insignificante (100Kbps)
+        enlaces_voip = self.ruta_enlaces_voip.get(accion_int, [4, 0])
+        lat_voip = np.mean([self.estado_actual[idx * 3 + 0] for idx in enlaces_voip])
+        loss_voip = np.mean([self.estado_actual[idx * 3 + 1] for idx in enlaces_voip])
+        bw_voip = np.mean([self.estado_actual[idx * 3 + 2] for idx in enlaces_voip])
+
+        # Recompensas por tipo de tráfico (pesos según sensibilidad QoS)
+        # TCP: 50% BW, 25% latencia, 25% pérdida
+        recompensa_tcp = (
+            (0.5 * bw_tcp   / 1000.0) -
+            (0.25 * lat_tcp  /  100.0) -
+            (0.25 * loss_tcp /  100.0)
         )
+        # Video: 30% BW, 35% latencia, 35% pérdida
+        recompensa_video = (
+            (0.3 * bw_video   / 1000.0) -
+            (0.35 * lat_video  /  100.0) -
+            (0.35 * loss_video /  100.0)
+        )
+        # VoIP: 10% BW, 45% latencia, 45% pérdida (muy sensible a retardo/pérdida)
+        recompensa_voip = (
+            (0.1 * bw_voip   / 1000.0) -
+            (0.45 * lat_voip  /  100.0) -
+            (0.45 * loss_voip /  100.0)
+        )
+        # Combinar todas las recompensas con pesos por importancia (TCP 40%, Video 30%, VoIP 30%)
+        recompensa = (0.4 * recompensa_tcp + 0.3 * recompensa_video + 0.3 * recompensa_voip)
 
-        # Castigo/premio contextual
-        ruta_elegida_mala = lat_elegida >= 50.0
-        ruta_otra_mala    = lat_otra    >= 50.0
+        # Castigo/premio contextual (considerando los 3 flujos)
+        lat_elegida_max = max(lat_tcp, lat_video, lat_voip)
+
+        # Encontrar la mejor latencia máxima entre las otras rutas
+        mejor_otra_max = float('inf')
+        for a in self.ruta_enlaces_tcp.keys():
+            if a != accion_int:
+                r_tcp = self.ruta_enlaces_tcp[a]
+                r_video = self.ruta_enlaces_video[a]
+                r_voip = self.ruta_enlaces_voip[a]
+                lat_tcp_otra = np.mean([self.estado_actual[idx * 3 + 0] for idx in r_tcp])
+                lat_video_otra = np.mean([self.estado_actual[idx * 3 + 0] for idx in r_video])
+                lat_voip_otra = np.mean([self.estado_actual[idx * 3 + 0] for idx in r_voip])
+                lat_max_otra = max(lat_tcp_otra, lat_video_otra, lat_voip_otra)
+                mejor_otra_max = min(mejor_otra_max, lat_max_otra)
+
+        ruta_elegida_mala = lat_elegida_max >= 50.0
+        ruta_otra_mala    = mejor_otra_max >= 50.0
 
         if ruta_elegida_mala and not ruta_otra_mala:
-            recompensa -= 1.0   # Eligió la mala habiendo una buena disponible
+            recompensa -= 1.0   # Eligió ruta mala habiendo una buena disponible
         elif ruta_elegida_mala and ruta_otra_mala:
             recompensa -= 0.2   # Ambas malas: castigo leve
         else:
@@ -151,7 +219,8 @@ class RedSdnEnv(gym.Env):
             "s5-eth3", "s5-eth4"
         ]
         for iface in enlaces:
-            os.system(f"sudo tc qdisc del dev {iface} root 2>/dev/null")
+            subprocess.run(f"sudo -n tc qdisc del dev {iface} root", shell=True,
+                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
         escenario = random.choice(["normal", "latencia", "perdida", "congestion"])
         ruta_afectada = random.choice(enlaces)
@@ -159,16 +228,16 @@ class RedSdnEnv(gym.Env):
         print(f"\n[!] ---> CAMBIO DE ESCENARIO: {escenario.upper()} en {ruta_afectada} <---")
 
         if escenario == "latencia":
-            os.system(f"sudo tc qdisc add dev {ruta_afectada} root netem delay 100ms")
+            subprocess.run(f"sudo -n tc qdisc add dev {ruta_afectada} root netem delay 100ms", shell=True)
         elif escenario == "perdida":
-            os.system(f"sudo tc qdisc add dev {ruta_afectada} root netem loss 10%")
+            subprocess.run(f"sudo -n tc qdisc add dev {ruta_afectada} root netem loss 10%", shell=True)
         elif escenario == "congestion":
-            os.system(f"sudo tc qdisc add dev {ruta_afectada} root tbf rate 10mbit burst 32kbit latency 400ms")
+            subprocess.run(f"sudo -n tc qdisc add dev {ruta_afectada} root tbf rate 10Mbit burst 32kbit latency 400ms", shell=True)
         # "normal": sin reglas, red limpia
 
 
 if __name__ == "__main__":
-    from stable_baselines3.common.env_checker import check_env
+    from stable_baselines3.common.env_check import check_env
     env = RedSdnEnv()
     check_env(env, warn=True)
     print("\n¡El Entorno Gym es estructuralmente correcto y está listo para entrenar!")

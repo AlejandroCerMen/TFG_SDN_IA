@@ -19,26 +19,25 @@ env = VecNormalize(
 
 # 2. Configurar el modelo de IA
 #
-# - n_steps=512:      Pasos recogidos antes de cada actualización.
-#                     Con fps≈14 (Session HTTP persistente + sleep=0.05),
-#                     cada ronda tarda ~36s → estadísticas cada ~36 segundos.
-#                     Aumentado desde 256 porque ahora tenemos 4 acciones
-#                     (antes eran 2) y 18 dimensiones de estado (antes 6).
-#                     Más experiencia = mejor estimación de ventajas.
+# - n_steps=2048:     Pasos recogidos antes de cada actualización.
+#                     Más experiencia = mejor estimación de ventajas para
+#                     4 acciones y 18 dimensiones de estado.
 #
-# - batch_size=64:    Divide exactamente n_steps (512/64 = 8 mini-batches).
+# - batch_size=128:   2048/128 = 16 mini-batches por época.
 #
 # - n_epochs=10:      Reutilizaciones de cada batch de experiencias.
 #
-# - learning_rate=3e-4: Tasa estándar para PPO.
+# - learning_rate=1e-4: Reducido desde 3e-4 para mayor estabilidad.
 #
-# - ent_coef=0.05:    Mantiene la exploración activa durante el entrenamiento
-#                     (importante con 4 acciones para explorar todas).
+# - ent_coef=0.01:    Coeficiente de entropía reducido (ya exploró suficiente).
 #
-# - vf_coef=0.75:     Mayor peso al crítico (red de valor) para estabilizar
-#                     el aprendizaje en un espacio de estados más grande (18 dims).
+# - vf_coef=0.5:      Equilibrio entre política y valor.
 #
-# - clip_range=0.2:   Recorte PPO estándar; evita actualizaciones bruscas.
+# - gamma=0.95:       Descuento más corto para entorno ruidoso.
+#
+# - gae_lambda=0.90:  Reduce varianza del estimador de ventaja.
+#
+# - clip_range=0.2:   Recorte PPO estándar.
 #
 model = PPO(
     "MlpPolicy",

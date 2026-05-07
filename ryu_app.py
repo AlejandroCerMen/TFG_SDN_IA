@@ -120,8 +120,8 @@ class TFG_RyuController(app_manager.RyuApp):
                         # Si no hay límite, ponemos un ancho de banda alto simulado de 1 Gigabit (1000 Mbps)
                         self.metricas_red[bw_key] = round(random.uniform(950.0, 1000.0), 1)
                         
-                except:
-                    pass
+                except Exception as e:
+                    print(f"[Telemetría] Error leyendo {interfaz}: {e}")
 
             # Pausar una décima de segundo
             hub.sleep(0.05)
@@ -312,24 +312,29 @@ class IA_API_Controller(ControllerBase):
                 0: {
                     'dpid_path_tcp': [3, 1, 4],
                     'dpid_path_udp': [4, 1, 5],
+                    'dpid_path_voip': [5, 1, 3],
                 },
                 1: {
                     'dpid_path_tcp': [3, 1, 4],
                     'dpid_path_udp': [4, 2, 5],
+                    'dpid_path_voip': [5, 1, 3],
                 },
                 2: {
                     'dpid_path_tcp': [3, 2, 4],
                     'dpid_path_udp': [4, 1, 5],
+                    'dpid_path_voip': [5, 2, 3],
                 },
                 3: {
                     'dpid_path_tcp': [3, 2, 4],
                     'dpid_path_udp': [4, 2, 5],
+                    'dpid_path_voip': [5, 2, 3],
                 },
             }
             ruta = rutas_accion.get(accion, rutas_accion[0])
 
             self.ryu_app.instalar_ruta_dinamica(ruta['dpid_path_tcp'], '10.0.0.1', '10.0.0.4')
             self.ryu_app.instalar_ruta_dinamica(ruta['dpid_path_udp'], '10.0.0.3', '10.0.0.6')
+            self.ryu_app.instalar_ruta_dinamica(ruta['dpid_path_voip'], '10.0.0.5', '10.0.0.2')
 
             respuesta_ok = json.dumps({"status": "ok"})
             return Response(content_type='application/json', body=respuesta_ok.encode('utf-8'))

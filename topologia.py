@@ -62,9 +62,9 @@ def iniciar_red():
     h4, h5, h6 = net.get('h4', 'h5', 'h6')
 
     # 1. Levantamos los servidores en los nodos destino (en segundo plano con '&')
-    h2.cmd('iperf -s &')        # h2 escucha TCP
-    h4.cmd('iperf -s -u &')     # h4 escucha UDP
-    h6.cmd('iperf -s -u &')     # h6 escucha UDP
+    h2.cmd('iperf -s -u &')     # h2 escucha UDP (VoIP)
+    h4.cmd('iperf -s &')        # h4 escucha TCP (elefante)
+    h6.cmd('iperf -s -u &')     # h6 escucha UDP (vídeo)
 
     print("[+] Inyectando flujos de red continuos (TCP, Vídeo, VoIP)...")
     

@@ -29,12 +29,12 @@ def poner_ia_en_produccion():
         3: "RUTA_3 [Leaf3→Spine2→Leaf4]",
     }
     
-    # Mapeo de enlaces por ruta para estadísticas
-    ruta_enlaces = {
-        0: [0, 1, 2],
-        1: [3, 4, 5],
-        2: [0, 3, 4],
-        3: [1, 2, 5],
+    # Mapeo de enlaces por ruta para estadísticas (TCP es el flujo principal)
+    ruta_enlaces_tcp = {
+        0: [0, 2],
+        1: [0, 2],
+        2: [1, 3],
+        3: [1, 3],
     }
 
     print("\n[================================================]")
@@ -58,14 +58,15 @@ def poner_ia_en_produccion():
             # Extraer latencias de los 6 enlaces (posiciones 0, 3, 6, 9, 12, 15)
             latencias = [raw_obs[i*3 + 0] for i in range(6)]
             
-            # Calcular latencia promedio de la ruta seleccionada
-            enlaces_ruta = ruta_enlaces.get(accion, [])
+            # Calcular latencia promedio de la ruta seleccionada (TCP)
+            enlaces_ruta = ruta_enlaces_tcp.get(accion, [])
             lat_promedio_ruta = np.mean([latencias[e] for e in enlaces_ruta]) if enlaces_ruta else 0.0
             
             # Log cada 10 pasos para no saturar la consola
             if paso % 10 == 0:
+                lat_str = ', '.join(f'{lat:.1f}ms' for lat in latencias)
                 print(f"[IA-Paso {paso}] Acción: {accion} | {ruta_elegida}")
-                print(f"           Latencias enlaces: {[f'{lat:.1f}ms' for lat in latencias]}")
+                print(f"           Latencias enlaces: [{lat_str}]")
                 print(f"           Latencia promedio ruta: {lat_promedio_ruta:.1f}ms | Recompensa: {reward[0]:.3f}\n")
 
     except KeyboardInterrupt:

@@ -23,6 +23,7 @@ import random
 import numpy as np
 import requests
 import os
+import subprocess
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from stable_baselines3 import PPO
@@ -33,12 +34,70 @@ from controlador_ia import RedSdnEnv
 # CONFIGURACIÓN
 # ─────────────────────────────────────────────
 SEED             = 42          # Semilla maestra para reproducibilidad
-PASOS_EVALUACION = 500         # Pasos por política (más → más significativo)
+PASOS_EVALUACION = 2000         # Pasos por política (más → más significativo)
 N_RUNS           = 3           # Repeticiones con semillas distintas para IC
-FICHERO_CSV      = "resultados_evaluacion.csv"
-FICHERO_GRAFICAS = "graficas_tfg.png"
+FICHERO_CSV       = "resultados_evaluacion.csv"
+FICHERO_GRAFICAS  = "graficas_tfg.png"
+FICHERO_GRAFICAS_FLUJOS = "graficas_flujos.png"
 
 session = requests.Session()
+
+# ─────────────────────────────────────────────
+# CONSTANTES DE TOPOLOGÍA / RUTAS
+# ─────────────────────────────────────────────
+INTERFACES_EVAL = [
+    "s3-eth3", "s3-eth4",
+    "s4-eth3", "s4-eth4",
+    "s5-eth3", "s5-eth4",
+]
+# Rutas para TCP (h1->h4), Video (h3->h6) y VoIP (h5->h2) por acción
+RUTA_ENLACES_TCP = {
+    0: [0, 2],
+    1: [0, 2],
+    2: [1, 3],
+    3: [1, 3],
+}
+RUTA_ENLACES_VIDEO = {
+    0: [2, 4],
+    1: [3, 5],
+    2: [2, 4],
+    3: [3, 5],
+}
+RUTA_ENLACES_VOIP = {
+    0: [4, 0],
+    1: [4, 0],
+    2: [5, 1],
+    3: [5, 1],
+}
+N_RUTAS = 4
+
+# ─────────────────────────────────────────────
+# MAPEO FLUJO → ENLACES (por acción)
+# Cada flujo usa distintos enlaces según la ruta elegida:
+# - TCP (h1→h4): s3 → (s1/s2) → s4
+# - Video UDP (h3→h6): s4 → (s1/s2) → s5
+# - VoIP UDP (h5→h2): s5 → (s1/s2) → s3
+# ─────────────────────────────────────────────
+FLUJO_ENLACES = {
+    'tcp': {
+        0: [0, 2],   # h1→h4 via s1: s3-eth3 + s4-eth3
+        1: [1, 3],   # h1→h4 via s2: s3-eth4 + s4-eth4
+        2: [0, 2],   # h1→h4 via s1
+        3: [1, 3],   # h1→h4 via s2
+    },
+    'video': {
+        0: [2, 4],   # h3→h6 via s1: s4-eth3 + s5-eth3
+        1: [3, 5],   # h3→h6 via s2: s4-eth4 + s5-eth4
+        2: [2, 4],   # h3→h6 via s1
+        3: [3, 5],   # h3→h6 via s2
+    },
+    'voip': {
+        0: [4, 0],   # h5→h2 via s1: s5-eth3 + s3-eth3
+        1: [5, 1],   # h5→h2 via s2: s5-eth4 + s3-eth4
+        2: [4, 0],   # h5→h2 via s1
+        3: [5, 1],   # h5→h2 via s2
+    },
+}
 
 # ─────────────────────────────────────────────
 # GENERADOR DE ESCENARIOS (semilla fija)
@@ -53,9 +112,9 @@ def generar_secuencia_escenarios(n_pasos, seed):
     secuencia = []
     paso_actual = 0
     while paso_actual < n_pasos:
-        duracion    = rng.randint(30, 80)
-        escenario   = rng.choice(["normal", "latencia", "perdida", "congestion"])
-        interfaz    = rng.choice(["s1-eth2", "s1-eth3"])
+        duracion  = rng.randint(30, 80)
+        escenario = rng.choice(["normal", "latencia", "perdida", "congestion"])
+        interfaz  = rng.choice(INTERFACES_EVAL)
         secuencia.append((paso_actual, escenario, interfaz))
         paso_actual += duracion
     return secuencia
@@ -66,53 +125,117 @@ def generar_secuencia_escenarios(n_pasos, seed):
 # ─────────────────────────────────────────────
 
 def limpiar_tc():
-    os.system("sudo tc qdisc del dev s1-eth2 root 2>/dev/null")
-    os.system("sudo tc qdisc del dev s1-eth3 root 2>/dev/null")
+    for interfaz in INTERFACES_EVAL:
+        subprocess.run(f"sudo -n tc qdisc del dev {interfaz} root", shell=True,
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
 
 def aplicar_escenario(escenario, interfaz):
     limpiar_tc()
     if escenario == "latencia":
-        os.system(f"sudo tc qdisc add dev {interfaz} root netem delay 100ms")
+        subprocess.run(f"sudo -n tc qdisc add dev {interfaz} root netem delay 100ms", shell=True)
     elif escenario == "perdida":
-        os.system(f"sudo tc qdisc add dev {interfaz} root netem loss 10%")
+        subprocess.run(f"sudo -n tc qdisc add dev {interfaz} root netem loss 10%", shell=True)
     elif escenario == "congestion":
-        os.system(f"sudo tc qdisc add dev {interfaz} root tbf rate 10mbit burst 32kbit latency 400ms")
+        subprocess.run(f"sudo -n tc qdisc add dev {interfaz} root tbf rate 10Mbit burst 32kbit latency 400ms", shell=True)
     # "normal": sin reglas
+
 
 def leer_metricas():
     try:
         r = session.get('http://127.0.0.1:8080/ia/metricas', timeout=1)
         d = r.json()
-        return (float(d['latencia_A']), float(d['perdida_A']), float(d['bw_A']),
-                float(d['latencia_B']), float(d['perdida_B']), float(d['bw_B']))
+        return np.array([
+            value
+            for i in range(1, 7)
+            for value in (
+                float(d[f'latencia_{i}']),
+                float(d[f'perdida_{i}']),
+                float(d[f'bw_{i}']),
+            )
+        ], dtype=np.float32)
     except Exception as e:
         print(f"  [!] Error leyendo métricas: {e}")
-        return (0, 0, 0, 0, 0, 0)
+        return np.zeros(18, dtype=np.float32)
+
 
 def enviar_accion(accion):
     try:
-        session.post('http://127.0.0.1:8080/ia/rutas',
+        session.post('http://127.0.0.1:8080/ia/ruta_dinamica',
                      json={"accion": int(accion)}, timeout=1)
     except Exception:
         pass
 
+
 def calcular_recompensa(action, estado):
-    if action == 0:
-        lat, loss, bw = estado[0], estado[1], estado[2]
-        lat_otra = estado[3]
-    else:
-        lat, loss, bw = estado[3], estado[4], estado[5]
-        lat_otra = estado[0]
+    accion_int = int(action)
 
-    r = (0.4 * bw / 1000.0) - (0.3 * lat / 100.0) - (0.3 * loss / 100.0)
+    # TCP (h1->h4) - Flujo elefante: sensible a BW, moderado a latencia/pérdida
+    enlaces_tcp = RUTA_ENLACES_TCP.get(accion_int, [0, 2])
+    lat_tcp = np.mean([estado[idx * 3 + 0] for idx in enlaces_tcp])
+    loss_tcp = np.mean([estado[idx * 3 + 1] for idx in enlaces_tcp])
+    bw_tcp = np.mean([estado[idx * 3 + 2] for idx in enlaces_tcp])
 
-    if lat >= 50.0 and lat_otra < 50.0:
-        r -= 2.0
-    elif lat >= 50.0 and lat_otra >= 50.0:
-        r -= 0.2
+    # Video UDP (h3->h6) - Sensible a jitter y BW, moderado a latencia/pérdida
+    enlaces_video = RUTA_ENLACES_VIDEO.get(accion_int, [2, 4])
+    lat_video = np.mean([estado[idx * 3 + 0] for idx in enlaces_video])
+    loss_video = np.mean([estado[idx * 3 + 1] for idx in enlaces_video])
+    bw_video = np.mean([estado[idx * 3 + 2] for idx in enlaces_video])
+
+    # VoIP UDP (h5->h2) - MUY sensible a jitter/latencia, BW insignificante (100Kbps)
+    enlaces_voip = RUTA_ENLACES_VOIP.get(accion_int, [4, 0])
+    lat_voip = np.mean([estado[idx * 3 + 0] for idx in enlaces_voip])
+    loss_voip = np.mean([estado[idx * 3 + 1] for idx in enlaces_voip])
+    bw_voip = np.mean([estado[idx * 3 + 2] for idx in enlaces_voip])
+
+    # Recompensas por tipo de tráfico (pesos según sensibilidad QoS)
+    # TCP: 50% BW, 25% latencia, 25% pérdida
+    recompensa_tcp = (
+        (0.5 * bw_tcp   / 1000.0) -
+        (0.25 * lat_tcp  /  100.0) -
+        (0.25 * loss_tcp /  100.0)
+    )
+    # Video: 30% BW, 35% latencia, 35% pérdida
+    recompensa_video = (
+        (0.3 * bw_video   / 1000.0) -
+        (0.35 * lat_video  /  100.0) -
+        (0.35 * loss_video /  100.0)
+    )
+    # VoIP: 10% BW, 45% latencia, 45% pérdida (muy sensible a retardo/pérdida)
+    recompensa_voip = (
+        (0.1 * bw_voip   / 1000.0) -
+        (0.45 * lat_voip  /  100.0) -
+        (0.45 * loss_voip /  100.0)
+    )
+    # Combinar todas las recompensas con pesos por importancia (TCP 40%, Video 30%, VoIP 30%)
+    recompensa = (0.4 * recompensa_tcp + 0.3 * recompensa_video + 0.3 * recompensa_voip)
+
+    # Castigo/premio contextual (considerando los 3 flujos)
+    lat_elegida_max = max(lat_tcp, lat_video, lat_voip)
+
+    # Encontrar la mejor latencia máxima entre las otras rutas
+    mejor_otra_max = float('inf')
+    for a in RUTA_ENLACES_TCP.keys():
+        if a != accion_int:
+            r_tcp = RUTA_ENLACES_TCP[a]
+            r_video = RUTA_ENLACES_VIDEO[a]
+            r_voip = RUTA_ENLACES_VOIP[a]
+            lat_tcp_otra = np.mean([estado[idx * 3 + 0] for idx in r_tcp])
+            lat_video_otra = np.mean([estado[idx * 3 + 0] for idx in r_video])
+            lat_voip_otra = np.mean([estado[idx * 3 + 0] for idx in r_voip])
+            lat_max_otra = max(lat_tcp_otra, lat_video_otra, lat_voip_otra)
+            mejor_otra_max = min(mejor_otra_max, lat_max_otra)
+
+    ruta_elegida_mala = lat_elegida_max >= 50.0
+    ruta_otra_mala    = mejor_otra_max >= 50.0
+
+    if ruta_elegida_mala and not ruta_otra_mala:
+        recompensa -= 1.0
+    elif ruta_elegida_mala and ruta_otra_mala:
+        recompensa -= 0.2
     else:
-        r += 1.0
-    return r
+        recompensa += 0.5
+    return recompensa
 
 
 # ─────────────────────────────────────────────
@@ -128,6 +251,8 @@ def evaluar_politica(nombre, fn_accion, pasos, secuencia_escenarios, env_norm=No
     print(f"\n[+] Evaluando: {nombre} ({pasos} pasos)...")
     limpiar_tc()
     resultados = []
+    resultados_flujos = {flujo: [] for flujo in FLUJO_ENLACES.keys()}
+    latencia_anterior = {flujo: None for flujo in FLUJO_ENLACES.keys()}
 
     # Índice apuntando al próximo evento de escenario
     idx_escenario = 0
@@ -139,40 +264,59 @@ def evaluar_politica(nombre, fn_accion, pasos, secuencia_escenarios, env_norm=No
                paso >= secuencia_escenarios[idx_escenario][0]):
             _, esc, iface = secuencia_escenarios[idx_escenario]
             aplicar_escenario(esc, iface)
-            nombre_ruta = "A" if iface == "s1-eth2" else "B"
-            escenario_actual = f"{esc}_ruta{nombre_ruta}"
+            escenario_actual = f"{esc}_en_{iface}"
             print(f"  [~] Paso {paso}: escenario '{esc}' en {iface}")
             idx_escenario += 1
 
-        # Leer estado
         estado = leer_metricas()
-
-        # Decidir acción
         accion = fn_accion(estado, env_norm)
-
-        # Aplicar acción y esperar telemetría
         enviar_accion(accion)
         time.sleep(0.05)
-
-        # Leer estado post-acción
         estado_post = leer_metricas()
-
-        if accion == 0:
-            lat_usada, loss_usada, bw_usada = estado_post[0], estado_post[1], estado_post[2]
-        else:
-            lat_usada, loss_usada, bw_usada = estado_post[3], estado_post[4], estado_post[5]
-
         recompensa = calcular_recompensa(accion, estado_post)
+
+        enlaces = RUTA_ENLACES_TCP.get(int(accion), [0, 2])
+        lat_usada = np.mean([estado_post[idx * 3 + 0] for idx in enlaces])
+        loss_usada = np.mean([estado_post[idx * 3 + 1] for idx in enlaces])
+        bw_usada = np.mean([estado_post[idx * 3 + 2] for idx in enlaces])
+
+        # Métricas por flujo (incluyendo jitter)
+        for flujo, enlaces_flujo in FLUJO_ENLACES.items():
+            enlaces_path = enlaces_flujo.get(int(accion), enlaces_flujo[0])
+            lat_flujo = np.mean([estado_post[idx * 3 + 0] for idx in enlaces_path])
+            loss_flujo = np.mean([estado_post[idx * 3 + 1] for idx in enlaces_path])
+            bw_flujo = np.mean([estado_post[idx * 3 + 2] for idx in enlaces_path])
+
+            # Calcular jitter (diferencia absoluta con latencia anterior)
+            jitter_flujo = 0.0
+            if latencia_anterior[flujo] is not None:
+                jitter_flujo = abs(lat_flujo - latencia_anterior[flujo])
+            latencia_anterior[flujo] = lat_flujo
+
+            resultados_flujos[flujo].append({
+                'latencia': float(lat_flujo),
+                'jitter': float(jitter_flujo),
+                'perdida': float(loss_flujo),
+                'bw': float(bw_flujo),
+            })
+
+        # Jitter general (media de todos los flujos del paso actual)
+        if all(len(resultados_flujos[f]) > 0 for f in FLUJO_ENLACES):
+            jitter_vals = [resultados_flujos[f][-1]['jitter'] for f in FLUJO_ENLACES]
+            jitter_total = np.mean(jitter_vals)
+        else:
+            jitter_total = 0.0
 
         resultados.append({
             'politica':   nombre,
             'paso':       paso,
-            'accion':     accion,
+            'accion':     int(accion),
             'escenario':  escenario_actual,
-            'latencia':   lat_usada,
-            'perdida':    loss_usada,
-            'bw':         bw_usada,
-            'recompensa': recompensa,
+            'latencia':   float(lat_usada),
+            'jitter':     float(jitter_total),
+            'perdida':    float(loss_usada),
+            'bw':         float(bw_usada),
+            'recompensa': float(recompensa),
         })
 
         if paso % 100 == 0:
@@ -180,7 +324,7 @@ def evaluar_politica(nombre, fn_accion, pasos, secuencia_escenarios, env_norm=No
                   f"bw={bw_usada:.0f}Mbps rew={recompensa:.3f}")
 
     limpiar_tc()
-    return resultados
+    return resultados, resultados_flujos
 
 
 # ─────────────────────────────────────────────
@@ -193,35 +337,49 @@ def politica_ia(estado, env_norm):
     accion, _ = modelo_ia.predict(obs_norm, deterministic=True)
     return int(accion[0])
 
-def politica_aleatoria(estado, _):
-    return random.randint(0, 1)
 
-def politica_siempre_A(estado, _):
+def politica_aleatoria(estado, _):
+    return random.randint(0, N_RUTAS - 1)
+
+
+def politica_siempre_ruta_0(estado, _):
     return 0
 
-def politica_siempre_B(estado, _):
-    return 1
+
+def politica_siempre_ruta_3(estado, _):
+    return 3
+
 
 def politica_mejor_latencia(estado, _):
-    return 0 if estado[0] <= estado[3] else 1
+    mejores = []
+    for accion, enlaces in RUTA_ENLACES_TCP.items():
+        lat_media = np.mean([estado[idx * 3 + 0] for idx in enlaces])
+        mejores.append((lat_media, accion))
+    return min(mejores)[1]
+
 
 def politica_mejor_compuesta(estado, _):
     """
     Baseline más fuerte: pondera latencia, pérdida y BW igual que la recompensa.
     Elige la ruta con mayor 'score' compuesto.
     """
-    score_a = (0.4 * estado[2] / 1000.0) - (0.3 * estado[0] / 100.0) - (0.3 * estado[1] / 100.0)
-    score_b = (0.4 * estado[5] / 1000.0) - (0.3 * estado[3] / 100.0) - (0.3 * estado[4] / 100.0)
-    return 0 if score_a >= score_b else 1
+    mejores = []
+    for accion, enlaces in RUTA_ENLACES_TCP.items():
+        lat_media = np.mean([estado[idx * 3 + 0] for idx in enlaces])
+        loss_media = np.mean([estado[idx * 3 + 1] for idx in enlaces])
+        bw_media = np.mean([estado[idx * 3 + 2] for idx in enlaces])
+        score = (0.4 * bw_media / 1000.0) - (0.3 * lat_media / 100.0) - (0.3 * loss_media / 100.0)
+        mejores.append((score, accion))
+    return max(mejores)[1]
 
 
 POLITICAS = [
     ("IA (PPO)",          politica_ia),
-    ("Mejor compuesta",   politica_mejor_compuesta),   # baseline fuerte nuevo
+    ("Mejor compuesta",   politica_mejor_compuesta),
     ("Mejor latencia",    politica_mejor_latencia),
     ("Aleatoria",         politica_aleatoria),
-    ("Siempre Ruta A",    politica_siempre_A),
-    ("Siempre Ruta B",    politica_siempre_B),
+    ("Siempre ruta 0",    politica_siempre_ruta_0),
+    ("Siempre ruta 3",    politica_siempre_ruta_3),
 ]
 
 COLORES = {
@@ -229,8 +387,8 @@ COLORES = {
     "Mejor compuesta":  "#00BCD4",
     "Mejor latencia":   "#4CAF50",
     "Aleatoria":        "#FF9800",
-    "Siempre Ruta A":   "#9C27B0",
-    "Siempre Ruta B":   "#F44336",
+    "Siempre ruta 0":   "#9C27B0",
+    "Siempre ruta 3":   "#F44336",
 }
 
 
@@ -256,6 +414,9 @@ if __name__ == '__main__':
     todos_runs = []   # todos los resultados individuales
     # resumen_runs[nombre_politica] = lista de dicts con medias de cada run
     resumen_runs = {nombre: [] for nombre, _ in POLITICAS}
+    # acumulador para métricas por flujo
+    # resumen_flujos[nombre][flujo] = lista de dicts con medias de cada run
+    resumen_flujos = {nombre: {flujo: [] for flujo in FLUJO_ENLACES.keys()} for nombre, _ in POLITICAS}
 
     for run in range(N_RUNS):
         seed_run = SEED + run
@@ -268,7 +429,7 @@ if __name__ == '__main__':
         print(f"  Secuencia de {len(secuencia)} cambios de escenario pre-generada.")
 
         for nombre, fn in POLITICAS:
-            res = evaluar_politica(nombre, fn, PASOS_EVALUACION,
+            res, res_flujos = evaluar_politica(nombre, fn, PASOS_EVALUACION,
                                    secuencia, env_norm if nombre == "IA (PPO)" else None)
             # Añadir columna run
             for r in res:
@@ -278,17 +439,27 @@ if __name__ == '__main__':
             # Guardar medias de este run
             resumen_runs[nombre].append({
                 'lat':  np.mean([r['latencia']   for r in res]),
+                'jitter': np.mean([r['jitter']   for r in res]),
                 'loss': np.mean([r['perdida']     for r in res]),
                 'bw':   np.mean([r['bw']          for r in res]),
                 'rec':  np.mean([r['recompensa']  for r in res]),
                 'rec_total': np.sum([r['recompensa'] for r in res]),
             })
 
+            # Guardar métricas por flujo
+            for flujo, datos in res_flujos.items():
+                resumen_flujos[nombre][flujo].append({
+                    'lat': np.mean([d['latencia'] for d in datos]),
+                    'jitter': np.mean([d['jitter'] for d in datos]),
+                    'loss': np.mean([d['perdida'] for d in datos]),
+                    'bw': np.mean([d['bw'] for d in datos]),
+                })
+
     # ─────────────────────────────────────────────
     # GUARDAR CSV
     # ─────────────────────────────────────────────
     campos = ['run', 'politica', 'paso', 'accion', 'escenario',
-              'latencia', 'perdida', 'bw', 'recompensa']
+              'latencia', 'jitter', 'perdida', 'bw', 'recompensa']
     with open(FICHERO_CSV, 'w', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=campos)
         writer.writeheader()
@@ -300,20 +471,23 @@ if __name__ == '__main__':
     # ─────────────────────────────────────────────
     nombres = [n for n, _ in POLITICAS]
     print("\n" + "=" * 72)
-    print(f"  {'POLÍTICA':<22} {'LAT(ms)':>12} {'LOSS(%)':>12} {'BW(Mbps)':>12} {'RECOMP':>12}")
+    print(f"  {'POLÍTICA':<22} {'LAT(ms)':>12} {'JITTER(ms)':>12} {'LOSS(%)':>12} {'BW(Mbps)':>12} {'RECOMP':>12}")
     print("=" * 72)
     resumen_final = {}
     for nombre in nombres:
         runs_data = resumen_runs[nombre]
-        lat_m,  lat_s  = np.mean([r['lat']  for r in runs_data]), np.std([r['lat']  for r in runs_data])
-        loss_m, loss_s = np.mean([r['loss'] for r in runs_data]), np.std([r['loss'] for r in runs_data])
-        bw_m,   bw_s   = np.mean([r['bw']   for r in runs_data]), np.std([r['bw']   for r in runs_data])
-        rec_m,  rec_s  = np.mean([r['rec']  for r in runs_data]), np.std([r['rec']  for r in runs_data])
+        lat_m,   lat_s   = np.mean([r['lat']    for r in runs_data]), np.std([r['lat']    for r in runs_data])
+        jitter_m, jitter_s = np.mean([r['jitter'] for r in runs_data]), np.std([r['jitter'] for r in runs_data])
+        loss_m,  loss_s  = np.mean([r['loss']   for r in runs_data]), np.std([r['loss']   for r in runs_data])
+        bw_m,    bw_s    = np.mean([r['bw']     for r in runs_data]), np.std([r['bw']     for r in runs_data])
+        rec_m,   rec_s   = np.mean([r['rec']    for r in runs_data]), np.std([r['rec']    for r in runs_data])
         resumen_final[nombre] = {'lat_m': lat_m, 'lat_s': lat_s,
+                                  'jitter_m': jitter_m, 'jitter_s': jitter_s,
                                   'loss_m': loss_m, 'loss_s': loss_s,
                                   'bw_m': bw_m, 'bw_s': bw_s,
                                   'rec_m': rec_m, 'rec_s': rec_s}
         print(f"  {nombre:<22} {lat_m:>7.1f}±{lat_s:<4.1f} "
+              f"{jitter_m:>7.2f}±{jitter_s:<4.2f} "
               f"{loss_m:>7.2f}±{loss_s:<4.2f} "
               f"{bw_m:>7.0f}±{bw_s:<4.0f} "
               f"{rec_m:>7.3f}±{rec_s:<5.3f}")
@@ -327,7 +501,7 @@ if __name__ == '__main__':
         f"Comparativa de Políticas SDN — {N_RUNS} runs × {PASOS_EVALUACION} pasos (seed base={SEED})",
         fontsize=13, fontweight='bold'
     )
-    gs = gridspec.GridSpec(2, 3, figure=fig, hspace=0.45, wspace=0.38)
+    gs = gridspec.GridSpec(3, 2, figure=fig, hspace=0.45, wspace=0.38)
 
     colores_lista = [COLORES[n] for n in nombres]
 
@@ -344,58 +518,133 @@ if __name__ == '__main__':
                     bar.get_height() + max(valores_s)*0.05 + max(valores_m)*0.01,
                     f'{val:.1f}', ha='center', va='bottom', fontsize=7.5)
 
-    # Latencia
+    # Latencia (fila 0, col 0)
     ax1 = fig.add_subplot(gs[0, 0])
     barras_con_ic(ax1,
                   [resumen_final[n]['lat_m']  for n in nombres],
                   [resumen_final[n]['lat_s']  for n in nombres],
                   "Latencia media (ms)", "Latencia media")
 
-    # Pérdida
+    # Jitter (fila 0, col 1)
     ax2 = fig.add_subplot(gs[0, 1])
     barras_con_ic(ax2,
+                  [resumen_final[n]['jitter_m'] for n in nombres],
+                  [resumen_final[n]['jitter_s'] for n in nombres],
+                  "Jitter medio (ms)", "Jitter medio")
+
+    # Pérdida (fila 1, col 0)
+    ax3 = fig.add_subplot(gs[1, 0])
+    barras_con_ic(ax3,
                   [resumen_final[n]['loss_m'] for n in nombres],
                   [resumen_final[n]['loss_s'] for n in nombres],
                   "Pérdida media (%)", "Pérdida de paquetes media")
 
-    # BW
-    ax3 = fig.add_subplot(gs[0, 2])
-    barras_con_ic(ax3,
+    # BW (fila 1, col 1)
+    ax4 = fig.add_subplot(gs[1, 1])
+    barras_con_ic(ax4,
                   [resumen_final[n]['bw_m']   for n in nombres],
                   [resumen_final[n]['bw_s']   for n in nombres],
                   "Ancho de banda medio (Mbps)", "Ancho de banda medio")
 
     # Evolución recompensa (media móvil, solo el último run para claridad)
-    ax4 = fig.add_subplot(gs[1, :2])
+    ax5 = fig.add_subplot(gs[2, 0])
     ventana = 30
     ultimo_run = N_RUNS
     for nombre in nombres:
         filas = [r for r in todos_runs if r['politica'] == nombre and r['run'] == ultimo_run]
         recs  = [r['recompensa'] for r in filas]
         suavizado = np.convolve(recs, np.ones(ventana)/ventana, mode='valid')
-        ax4.plot(suavizado, label=nombre, color=COLORES[nombre], linewidth=2)
-    ax4.set_xlabel("Paso")
-    ax4.set_ylabel(f"Recompensa (media móvil {ventana} pasos)")
-    ax4.set_title(f"Evolución recompensa — Run {ultimo_run} (seed={SEED + ultimo_run - 1})")
-    ax4.legend(fontsize=7.5)
-    ax4.grid(True, alpha=0.3)
+        ax5.plot(suavizado, label=nombre, color=COLORES[nombre], linewidth=2)
+    ax5.set_xlabel("Paso")
+    ax5.set_ylabel(f"Recompensa (media móvil {ventana} pasos)")
+    ax5.set_title(f"Evolución recompensa — Run {ultimo_run} (seed={SEED + ultimo_run - 1})")
+    ax5.legend(fontsize=7.5)
+    ax5.grid(True, alpha=0.3)
 
     # Recompensa media total con IC
-    ax5 = fig.add_subplot(gs[1, 2])
+    ax6 = fig.add_subplot(gs[2, 1])
     rec_totales_m = [np.mean([r['rec_total'] for r in resumen_runs[n]]) for n in nombres]
     rec_totales_s = [np.std ([r['rec_total'] for r in resumen_runs[n]]) for n in nombres]
-    bars5 = ax5.bar(range(len(nombres)), rec_totales_m, color=colores_lista,
+    bars6 = ax6.bar(range(len(nombres)), rec_totales_m, color=colores_lista,
                     yerr=rec_totales_s, capsize=4,
                     error_kw={'elinewidth': 1.5, 'alpha': 0.7})
-    ax5.set_xticks(range(len(nombres)))
-    ax5.set_xticklabels([n.replace(' ', '\n') for n in nombres], fontsize=7.5)
-    ax5.set_ylabel("Recompensa total acumulada")
-    ax5.set_title("Recompensa total (media ± std)")
-    for bar, val in zip(bars5, rec_totales_m):
-        ax5.text(bar.get_x() + bar.get_width()/2,
+    ax6.set_xticks(range(len(nombres)))
+    ax6.set_xticklabels([n.replace(' ', '\n') for n in nombres], fontsize=7.5)
+    ax6.set_ylabel("Recompensa total acumulada")
+    ax6.set_title("Recompensa total (media ± std)")
+    for bar, val in zip(bars6, rec_totales_m):
+        ax6.text(bar.get_x() + bar.get_width()/2,
                  bar.get_height() + max(rec_totales_s)*0.05 + 2,
                  f'{val:.0f}', ha='center', va='bottom', fontsize=7.5)
 
     plt.savefig(FICHERO_GRAFICAS, dpi=150, bbox_inches='tight')
     print(f"[+] Gráficas guardadas en {FICHERO_GRAFICAS}")
+
+    # ─────────────────────────────────────────────
+    # GRÁFICAS POR TIPO DE FLUJO (TCP, Video, VoIP)
+    # ─────────────────────────────────────────────
+    fig2 = plt.figure(figsize=(18, 16))
+    fig2.suptitle(
+        f"Comparativa por Tipo de Flujo — {N_RUNS} runs × {PASOS_EVALUACION} pasos",
+        fontsize=13, fontweight='bold'
+    )
+    gs2 = gridspec.GridSpec(4, 3, figure=fig2, hspace=0.50, wspace=0.35)
+
+    flujo_nombres = {
+        'tcp': 'TCP (h1→h4)',
+        'video': 'Video UDP (h3→h6)',
+        'voip': 'VoIP UDP (h5→h2)',
+    }
+    metricas = ['latencia', 'jitter', 'perdida', 'bw']
+    metricas_labels = {
+        'latencia': 'Latencia (ms)',
+        'jitter': 'Jitter (ms)',
+        'perdida': 'Pérdida (%)',
+        'bw': 'BW (Mbps)',
+    }
+    metricas_titulos = {
+        'latencia': 'Latencia',
+        'jitter': 'Jitter',
+        'perdida': 'Pérdida',
+        'bw': 'Ancho de banda',
+    }
+
+    posicion = 0
+    for flujo in FLUJO_ENLACES.keys():
+        for metrica in metricas:
+            posicion += 1
+            ax = fig2.add_subplot(gs2[posicion - 1])
+
+            valores_m = []
+            valores_s = []
+            for nombre in nombres:
+                datos = resumen_flujos[nombre][flujo]
+                if metrica == 'latencia':
+                    vals = [d['lat'] for d in datos]
+                elif metrica == 'jitter':
+                    vals = [d['jitter'] for d in datos]
+                elif metrica == 'perdida':
+                    vals = [d['loss'] for d in datos]
+                else:
+                    vals = [d['bw'] for d in datos]
+                valores_m.append(np.mean(vals))
+                valores_s.append(np.std(vals))
+
+            x = range(len(nombres))
+            bars = ax.bar(x, valores_m, color=colores_lista, yerr=valores_s,
+                          capsize=3, error_kw={'elinewidth': 1.2, 'alpha': 0.7})
+            ax.set_xticks(x)
+            ax.set_xticklabels([n.replace(' ', '\n') for n in nombres], fontsize=6.5)
+            ax.set_ylabel(metricas_labels[metrica], fontsize=8)
+            ax.set_title(f"{flujo_nombres[flujo]} — {metricas_titulos[metrica]}", fontsize=9, fontweight='bold')
+            ax.grid(True, alpha=0.3, axis='y')
+
+            max_val = max(valores_m) + max(valores_s) * 0.1
+            for bar, val in zip(bars, valores_m):
+                ax.text(bar.get_x() + bar.get_width()/2, max_val * 0.02,
+                        f'{val:.1f}', ha='center', va='bottom', fontsize=6)
+
+    plt.tight_layout(rect=[0, 0, 1, 0.96])
+    plt.savefig(FICHERO_GRAFICAS_FLUJOS, dpi=150, bbox_inches='tight')
+    print(f"[+] Gráficas por flujo guardadas en {FICHERO_GRAFICAS_FLUJOS}")
     print("\n¡Evaluación completa!")
