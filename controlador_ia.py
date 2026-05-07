@@ -39,6 +39,29 @@ class RedSdnEnv(gym.Env):
         # evitando el handshake TCP por cada paso.
         self.session = requests.Session()
 
+    def _post_con_reintento(self, url, datos, reintentos=3, timeout=1.5):
+        for intento in range(reintentos):
+            try:
+                self.session.post(url, json=datos, timeout=timeout)
+                return
+            except Exception as e:
+                if intento < reintentos - 1:
+                    time.sleep(0.1 * (intento + 1))  # 0.1s, 0.2s...
+                else:
+                    print(f"Error enviando orden a Ryu tras {reintentos} intentos: {e}")
+
+    def _get_con_reintento(self, url, reintentos=3, timeout=1.5):
+        for intento in range(reintentos):
+            try:
+                r = self.session.get(url, timeout=timeout)
+                return r.json()
+            except Exception as e:
+                if intento < reintentos - 1:
+                    time.sleep(0.1 * (intento + 1))
+                else:
+                    print(f"Error leyendo métricas tras {reintentos} intentos: {e}")
+        return None
+
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
         self.estado_actual = np.array([10.0, 0.0, 100.0] * 6, dtype=np.float32)
@@ -54,22 +77,21 @@ class RedSdnEnv(gym.Env):
             self.proximo_cambio = random.randint(30, 80)
 
         # 2. VALIDAR Y ENVIAR ACCIÓN A RYU (síncrono — Session reutiliza la conexión TCP)
-        try:
-            accion_valida = int(action)
-            if accion_valida < 0:
-                accion_valida = 0
-            elif accion_valida >= self.action_space.n:
-                accion_valida = self.action_space.n - 1
+        accion_valida = int(action)
+        if accion_valida < 0:
+            accion_valida = 0
+        elif accion_valida >= self.action_space.n:
+            accion_valida = self.action_space.n - 1
 
-            self.session.post('http://127.0.0.1:8080/ia/ruta_dinamica',
-                              json={"accion": accion_valida}, timeout=1)
-        except Exception as e:
-            print(f"Error enviando orden a Ryu: {e}")
+        self._post_con_reintento(
+            'http://127.0.0.1:8080/ia/ruta_dinamica',
+            {"accion": accion_valida}
+        )
 
         # 3. SLEEP MÍNIMO PARA EL TELEMETRY AGENT
         # El agente de Ryu (hub.sleep=0.05s) actualiza las métricas cada 50ms.
-        # Con 0.05s garantizamos al menos un ciclo completo antes del GET.
-        time.sleep(0.05)
+        # Con 0.03s garantizamos al menos un ciclo completo antes del GET.
+        time.sleep(0.03)
 
         # Log de progreso cada 10 pasos para confirmar actividad entre tablas
         if self.pasos_actuales % 10 == 0:
@@ -77,9 +99,8 @@ class RedSdnEnv(gym.Env):
             print(f"  [·] paso {self.pasos_actuales} — siguiente escenario en {faltan} pasos")
 
         # 4. LEER MÉTRICAS DESDE RYU para 6 enlaces clave
-        try:
-            respuesta = self.session.get('http://127.0.0.1:8080/ia/metricas', timeout=1)
-            datos = respuesta.json()
+        datos = self._get_con_reintento('http://127.0.0.1:8080/ia/metricas')
+        if datos:
             self.estado_actual = np.array([
                 float(datos['latencia_1']), float(datos['perdida_1']), float(datos['bw_1']),
                 float(datos['latencia_2']), float(datos['perdida_2']), float(datos['bw_2']),
@@ -88,8 +109,7 @@ class RedSdnEnv(gym.Env):
                 float(datos['latencia_5']), float(datos['perdida_5']), float(datos['bw_5']),
                 float(datos['latencia_6']), float(datos['perdida_6']), float(datos['bw_6']),
             ], dtype=np.float32)
-        except Exception as e:
-            print(f"Error conectando con Ryu: {e}")
+        # si datos es None, se reutiliza self.estado_actual del paso anterior
 
         # 5. CALCULAR RECOMPENSA usando el conjunto de enlaces de la acción seleccionada
         enlaces = self.ruta_enlaces.get(int(action), [0, 1, 2])
