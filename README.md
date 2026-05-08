@@ -10,29 +10,67 @@ Este repositorio contiene el código fuente desarrollado para el **Trabajo de Fi
 ## 🎯 Objetivo del Proyecto
 
 El sistema diseñado propone una **Arquitectura de Enrutamiento Híbrido**:
-1. **Fase Reactiva (Ryu):** Garantiza la conectividad inmediata sin pérdida de paquetes iniciales enrutando el tráfico por rutas por defecto.
-2. **Fase Proactiva (IA):** Un agente basado en Aprendizaje por Refuerzo (PPO) monitoriza continuamente la red. Al detectar cuellos de botella generados por "Flujos Elefante" (TCP), el agente interviene vía API REST para re-enrutar dinámicamente el tráfico, protegiendo así los "Flujos Ratón" sensibles a la latencia (VoIP y Vídeo).
+1. **Fase Reactiva (Ryu):** Garantiza la conectividad inmediata sin pérdida de paquetes iniciales enrutando el tráfico por rutas por defecto (Spine 1).
+2. **Fase Proactiva (IA):** Un agente basado en Aprendizaje por Refuerzo (PPO) monitoriza continuamente la red vía telemetría. Al detectar cuellos de botella, el agente interviene vía API REST para re-enrutar dinámicamente el tráfico, protegiendo todos los flujos según sus requisitos QoS mínimos.
 
 ## 🏗️ Arquitectura de la Red
 
-La simulación se ejecuta sobre **Mininet** con la siguiente topología de centro de datos:
-* **Topología:** Spine-Leaf (2 switches Spine, 3 switches Leaf).
-* **Controlador:** Ryu SDN Controller (OpenFlow 1.3).
-* **Nodos (Hosts):** 6 máquinas virtuales inyectando tráfico concurrente mediante `iperf`.
+La simulación se ejecuta sobre **Mininet** con la siguiente topología fija (no modificar):
+* **Topología:** Spine-Leaf (2 switches Spine: s1,s2 | 3 switches Leaf: s3,s4,s5 | 6 Hosts)
+* **Controlador:** Ryu SDN Controller (OpenFlow 1.3), arrancado con parches de compatibilidad para Python 3.10+
+* **Telemetría:** Actualización de métricas cada 50ms con EMA (alpha=0.25) en 6 enlaces clave
 
-### Escenarios de Tráfico (iperf3)
-* **Flujo Pesado (TCP):** Descargas masivas que saturan el ancho de banda.
-* **Flujo de Vídeo (UDP):** 20 Mbps, sensible a la pérdida de paquetes.
-* **Flujo de Voz/VoIP (UDP):** 100 Kbps, altamente sensible al Jitter.
+### Flujos de Tráfico (iperf3)
+Todos los flujos deben cumplir requisitos QoS mínimos:
+* **TCP (Elefante):** h1 → h4, BW > 100Mbps
+* **UDP Vídeo:** h3 → h6 (20 Mbps), BW > 15Mbps, pérdida < 3%
+* **UDP VoIP:** h5 → h2 (100 Kbps), latencia < 200ms, pérdida < 5%
 
 ## ⚙️ Estructura del Proyecto
 
-* `topologia.py`: Script de Mininet que define la red Spine-Leaf y lanza el simulador de tráfico automatizado (`iperf`).
-* `ryu_app.py`: Aplicación del controlador Ryu. Implementa el enrutamiento híbrido, la monitorización estocástica de telemetría y expone la API REST (`/ia/rutas`).
-* `controlador_ia.py`: Define el entorno de entrenamiento personalizado (Gymnasium) y la clase `RedSDNEnv`.
-* `evaluar_ia.py`: Script de validación que carga el modelo entrenado, ejecuta pasos deterministas y genera gráficas de rendimiento comparativo.
-* `CONTEXTO_TFG.md`: Documentación interna sobre la lógica de estados y acciones de la red neuronal.
+* `arrancar_ryu.py`: Lanza Ryu con parches de compatibilidad (no ejecutar ryu directamente)
+* `ryu_app.py`: Aplicación Ryu con enrutamiento híbrido, telemetría y API REST (`/ia/ruta_dinamica`, `/ia/metricas`)
+* `topologia.py`: Topología Spine-Leaf y lanzamiento de tráfico automatizado
+* `controlador_ia.py`: Entorno Gymnasium `RedSdnEnv` (18D state, 4 discrete actions) para entrenamiento PPO
+* `entrenar_ia.py`: Entrenamiento con PPO + VecNormalize (salida: `ia_sdn_optimizada.zip`, `ia_sdn_normalizer.pkl`)
+* `evaluar_ia.py`: Evaluación comparativa (requiere Ryu + Mininet ejecutándose)
+* `ejecutar_ia.py`: Despliegue en producción del modelo entrenado
+* `CONTEXTO_TFG.md`: Especificaciones completas del proyecto
+* `AGENTS.md`: Instrucciones para agentes de IA (orden de ejecución, restricciones)
 
-## 🚀 Instalación y Uso
+## 🚀 Ejecución (Orden Estricto)
 
-**Requisitos previos:** Entorno virtual de Ubuntu con Mininet, Python 3 y pip instalados.
+Requiere 3 terminales separados:
+1. **Ryu (Terminal 1):**
+   ```bash
+   python arrancar_ryu.py
+   ```
+2. **Mininet (Terminal 2, sudo):**
+   ```bash
+   sudo python3 topologia.py
+   ```
+3. **Entrenamiento/Evaluación (Terminal 3):**
+   ```bash
+   # Entrenar (borrar modelos antiguos si cambia la recompensa)
+   rm -f ia_sdn_optimizada.zip ia_sdn_normalizer.pkl
+   python entrenar_ia.py
+
+   # Evaluar modelo entrenado
+   python evaluar_ia.py
+
+   # Desplegar en producción
+   python ejecutar_ia.py
+   ```
+
+## 📊 Función de Recompensa (controlador_ia.py)
+
+Protege todos los flujos con penalizaciones de -2.0 si incumplen QoS mínimos, combinando recompensas normalizadas [0,1] por flujo:
+* TCP: 50% BW, 25% latencia, 25% pérdida
+* Vídeo: 30% BW, 35% latencia, 35% pérdida
+* VoIP: 10% BW, 45% latencia, 45% pérdida
+
+## ⚠️ Restricciones
+* No modificar la topología Spine-Leaf
+* Mantener algoritmo PPO (no aprendizaje supervisado)
+* Comentarios en español
+* Archivos de modelo/resultados gitignored (`.zip`, `.pkl`, `.csv`, `.png`)

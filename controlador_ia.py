@@ -236,32 +236,38 @@ class RedSdnEnv(gym.Env):
         loss_voip = np.mean([self.estado_actual[idx * 3 + 1] for idx in enlaces_voip])
         bw_voip = np.mean([self.estado_actual[idx * 3 + 2] for idx in enlaces_voip])
 
-        # Recompensas por tipo de tráfico (pesos según sensibilidad QoS)
-        # TCP: 50% BW, 25% latencia, 25% pérdida
+        # Recompensas individuales normalizadas a [0, 1] donde 1 es óptimo
+        # TCP (h1->h4): BW crítico, latencia moderada, pérdida moderada
         recompensa_tcp = (
-            (0.5 * bw_tcp   / 1000.0) -
-            (0.25 * lat_tcp  /  100.0) -
-            (0.25 * loss_tcp /  100.0)
+            0.5 * min(bw_tcp / 800.0, 1.0) +      # BW: 800Mbps+ = 1.0
+            0.25 * max(0, 1.0 - lat_tcp / 80.0) +  # Lat: <80ms = 1.0
+            0.25 * max(0, 1.0 - loss_tcp / 5.0)    # Loss: <5% = 1.0
         )
-        # Video: 30% BW, 35% latencia, 35% pérdida
+        # Video UDP (h3->h6): BW 20Mbps, latencia importante, pérdida moderada
         recompensa_video = (
-            (0.3 * bw_video   / 1000.0) -
-            (0.35 * lat_video  /  100.0) -
-            (0.35 * loss_video /  100.0)
+            0.3 * min(bw_video / 50.0, 1.0) +       # BW: 50Mbps+ = 1.0
+            0.35 * max(0, 1.0 - lat_video / 100.0) + # Lat: <100ms = 1.0
+            0.35 * max(0, 1.0 - loss_video / 3.0)   # Loss: <3% = 1.0
         )
-        # VoIP: 10% BW, 45% latencia, 45% pérdida (muy sensible a retardo/pérdida)
+        # VoIP UDP (h5->h2): BW irrelevante (100Kbps), latencia crítica, pérdida crítica
         recompensa_voip = (
-            (0.1 * bw_voip   / 1000.0) -
-            (0.45 * lat_voip  /  100.0) -
-            (0.45 * loss_voip /  100.0)
+            0.1 * min(bw_voip / 10.0, 1.0) +        # BW: 10Mbps+ = 1.0
+            0.45 * max(0, 1.0 - lat_voip / 150.0) + # Lat: <150ms = 1.0
+            0.45 * max(0, 1.0 - loss_voip / 2.0)   # Loss: <2% = 1.0
         )
-        # Combinar todas las recompensas con pesos por importancia (TCP 40%, Video 30%, VoIP 30%)
-        recompensa = (0.4 * recompensa_tcp + 0.3 * recompensa_video + 0.3 * recompensa_voip)
 
-        # Castigo/premio contextual (considerando los 3 flujos)
+        # Penalización por flujo insuficiente: si algún flujo está por debajo de umbral crítico
+        # Umbrales mínimos: TCP bw>100Mbps, Video bw>15Mbps, VoIP lat<200ms y loss<5%
+        penalty_tcp = -2.0 if (bw_tcp < 100.0 or loss_tcp > 5.0) else 0.0
+        penalty_video = -2.0 if (bw_video < 15.0 or loss_video > 3.0) else 0.0
+        penalty_voip = -2.0 if (lat_voip > 200.0 or loss_voip > 5.0) else 0.0
+
+        # Recompensa base: combinación ponderada (fuerza a todos los flujos estar bien)
+        recompensa_base = (0.4 * recompensa_tcp + 0.3 * recompensa_video + 0.3 * recompensa_voip)
+        recompensa = recompensa_base + penalty_tcp + penalty_video + penalty_voip
+
+        # Bonus por elección de ruta: comparar latencia máxima con alternativas
         lat_elegida_max = max(lat_tcp, lat_video, lat_voip)
-
-        # Encontrar la mejor latencia máxima entre las otras rutas
         mejor_otra_max = float('inf')
         for a in self.ruta_enlaces_tcp.keys():
             if a != accion_int:
@@ -274,21 +280,16 @@ class RedSdnEnv(gym.Env):
                 lat_max_otra = max(lat_tcp_otra, lat_video_otra, lat_voip_otra)
                 mejor_otra_max = min(mejor_otra_max, lat_max_otra)
 
-        ruta_elegida_mala = lat_elegida_max >= 50.0
-        ruta_otra_mala    = mejor_otra_max >= 50.0
-
-        if ruta_elegida_mala and not ruta_otra_mala:
-            recompensa -= 1.0   # Eligió ruta mala habiendo una buena disponible
-        elif ruta_elegida_mala and ruta_otra_mala:
-            recompensa -= 0.2   # Ambas malas: castigo leve
-        else:
-            recompensa += 0.5   # Eligió correctamente
+        if lat_elegida_max < mejor_otra_max:
+            recompensa += 0.3   # Mejor que todas las alternativas
+        elif lat_elegida_max == mejor_otra_max:
+            recompensa += 0.1   # Igual de buena
 
         return self.estado_actual, float(recompensa), False, False, {}
 
 
 if __name__ == "__main__":
-    from stable_baselines3.common.env_check import check_env
+    from stable_baselines3.common.env_checker import check_env
     env = RedSdnEnv()
     check_env(env, warn=True)
     print("\n¡El Entorno Gym es estructuralmente correcto y está listo para entrenar!")
