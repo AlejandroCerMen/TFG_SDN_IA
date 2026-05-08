@@ -43,15 +43,15 @@ model = PPO(
     "MlpPolicy",
     env,
     verbose=1,
-    n_steps=2048,        # era 512 — más contexto por actualización
-    batch_size=128,      # escalar con n_steps (2048/128 = 16 mini-batches)
+    n_steps=4096,        # era 2048 — más contexto para promediar ruido
+    batch_size=256,      # escalar proporcionalmente con n_steps
     n_epochs=10,
-    learning_rate=1e-4,  # era 3e-4 — bajar para estabilidad
-    ent_coef=0.01,       # era 0.05 — menos exploración, ya ha explorado suficiente
-    vf_coef=0.5,         # era 0.75 — equilibrar con el policy gradient
+    learning_rate=1e-4,  # bajar para estabilidad
+    ent_coef=0.003,      # era 0.01 — frenar la entropía creciente
+    vf_coef=0.75,        # era 0.5 — más peso al value function
     clip_range=0.2,
-    gamma=0.95,          # NUEVO — descuento más corto para env ruidoso
-    gae_lambda=0.90,     # NUEVO — reduce la varianza del estimador de ventaja
+    gamma=0.90,          # era 0.95 — reducir horizonte en entorno ruidoso
+    gae_lambda=0.90,     # reduce la varianza del estimador de ventaja
     policy_kwargs=dict(
         net_arch=dict(pi=[128, 128], vf=[128, 128])  # red más grande para 18D
     ),

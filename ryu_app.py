@@ -37,6 +37,8 @@ class TFG_RyuController(app_manager.RyuApp):
             'latencia_5': 0.1, 'perdida_5': 0.0, 'bw_5': 1000.0,
             'latencia_6': 0.1, 'perdida_6': 0.0, 'bw_6': 1000.0,
         }
+        # Copia para suavizado EMA (Media Móvil Exponencial)
+        self.metricas_suavizadas = dict(self.metricas_red)
 
         # Mapeos para topología dinámica
         self.ip_to_mac = {
@@ -78,10 +80,13 @@ class TFG_RyuController(app_manager.RyuApp):
         """
         Hilo en segundo plano (Telemetry Agent) Avanzado.
         Detecta latencia, pérdida de paquetes y ancho de banda.
+        Usa EMA (Media Móvil Exponencial) para suavizar el ruido.
         """
         import subprocess
         import random
         from ryu.lib import hub
+        
+        ALPHA = 0.25  # Factor de suavizado: 0=sin cambio, 1=sin suavizado
         
         while True:
             rutas = {
@@ -100,30 +105,42 @@ class TFG_RyuController(app_manager.RyuApp):
                     # Leemos qué le está pasando al cable físicamente
                     out = subprocess.check_output(f"tc qdisc show dev {interfaz}", shell=True, text=True, stderr=subprocess.DEVNULL)
                     
-                    # 1. Comprobar Latencia
+                    # 1. Comprobar Latencia (rango más estrecho para mayor realismo)
                     if "delay 100" in out:
-                        self.metricas_red[lat_key] = round(random.uniform(95.0, 105.0), 1)
+                        target_lat = round(random.uniform(92.0, 108.0), 1)
                     else:
-                        self.metricas_red[lat_key] = round(random.uniform(0.1, 0.5), 1)
+                        target_lat = round(random.uniform(0.1, 0.8), 1)
+                    # EMA: suavizar con el valor anterior
+                    self.metricas_red[lat_key] = round(
+                        ALPHA * target_lat + (1 - ALPHA) * self.metricas_red[lat_key], 2
+                    )
                         
                     # 2. Comprobar Pérdida de paquetes
                     if "loss 10%" in out:
-                        self.metricas_red[loss_key] = round(random.uniform(9.0, 11.0), 1)
+                        target_loss = round(random.uniform(9.0, 11.0), 1)
                     else:
-                        self.metricas_red[loss_key] = 0.0
+                        target_loss = 0.0
+                    # EMA: suavizar con el valor anterior
+                    self.metricas_red[loss_key] = round(
+                        ALPHA * target_loss + (1 - ALPHA) * self.metricas_red[loss_key], 2
+                    )
                         
                     # 3. Comprobar Ancho de Banda (Congestión)
                     if "rate 10Mbit" in out:
                         # Si está estrangulado a 10Mbit, la IA lo verá
-                        self.metricas_red[bw_key] = round(random.uniform(9.0, 10.0), 1)
+                        target_bw = round(random.uniform(9.0, 10.0), 1)
                     else:
-                        # Si no hay límite, ponemos un ancho de banda alto simulado de 1 Gigabit (1000 Mbps)
-                        self.metricas_red[bw_key] = round(random.uniform(950.0, 1000.0), 1)
+                        # Si no hay límite, ancho de banda alto simulado de 1 Gigabit
+                        target_bw = round(random.uniform(950.0, 1000.0), 1)
+                    # EMA: suavizar con el valor anterior
+                    self.metricas_red[bw_key] = round(
+                        ALPHA * target_bw + (1 - ALPHA) * self.metricas_red[bw_key], 2
+                    )
                         
                 except Exception as e:
                     print(f"[Telemetría] Error leyendo {interfaz}: {e}")
 
-            # Pausar una décima de segundo
+            # Pausar 50ms
             hub.sleep(0.05)
 
     @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)

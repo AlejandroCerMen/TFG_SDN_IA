@@ -30,8 +30,21 @@ class RedSdnEnv(gym.Env):
         self.observation_space = spaces.Box(low=limites_bajos, high=limites_altos, dtype=np.float32)
 
         self.pasos_actuales = 0
-        self.proximo_cambio = random.randint(30, 80)
         self.estado_actual = np.zeros(18, dtype=np.float32)
+
+        # Gestor de escenarios estructurado (reemplaza _aplicar_congestion_aleatoria)
+        self.escenario_actual = "normal"
+        self.interfaz_activa = None
+        self.pasos_en_escenario = 0
+        self.duracion_escenario = random.randint(80, 150)
+
+        # Probabilidades de cada escenario
+        self.probabilidades = {
+            "normal":     0.20,
+            "latencia":   0.30,
+            "perdida":    0.25,
+            "congestion": 0.25,
+        }
 
         # Mapas de ruta para calcular la recompensa por acción.
         # Las métricas se basan en 6 enlaces Spine-Leaf:
@@ -91,16 +104,81 @@ class RedSdnEnv(gym.Env):
         super().reset(seed=seed)
         # Estado inicial coherente con Ryu (lat=0.1ms, loss=0%, bw=1000Mbps)
         self.estado_actual = np.array([0.1, 0.0, 1000.0] * 6, dtype=np.float32)
+        
+        # Reiniciar variables de escenario
+        self.escenario_actual = "normal"
+        self.interfaz_activa = None
+        self.pasos_en_escenario = 0
+        self.duracion_escenario = random.randint(80, 150)
+        
         return self.estado_actual, {}
+
+    def _gestionar_escenario(self):
+        """
+        Gestor de escenarios con transiciones controladas.
+        Reemplaza a _aplicar_congestion_aleatoria().
+        """
+        self.pasos_en_escenario += 1
+
+        # ¿Toca cambiar de escenario?
+        if self.pasos_en_escenario < self.duracion_escenario:
+            return  # el escenario sigue activo, no hacer nada
+
+        # --- NUEVO ESCENARIO ---
+        self.pasos_en_escenario = 0
+        self.duracion_escenario = random.randint(80, 150)
+
+        # Elegir escenario con probabilidades controladas
+        escenarios = list(self.probabilidades.keys())
+        pesos = list(self.probabilidades.values())
+        nuevo_escenario = random.choices(escenarios, weights=pesos, k=1)[0]
+
+        # Elegir interfaz (evitar repetir la misma dos veces seguidas)
+        interfaces = [
+            "s3-eth3", "s3-eth4",
+            "s4-eth3", "s4-eth4",
+            "s5-eth3", "s5-eth4"
+        ]
+        interfaces_disponibles = [i for i in interfaces if i != self.interfaz_activa]
+        nueva_interfaz = random.choice(interfaces_disponibles)
+
+        # Limpiar SOLO la interfaz anterior (no reset total)
+        if self.interfaz_activa:
+            subprocess.run(
+                f"sudo -n tc qdisc del dev {self.interfaz_activa} root",
+                shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+            )
+
+        # Aplicar nuevo escenario
+        if nuevo_escenario == "latencia":
+            subprocess.run(
+                f"sudo -n tc qdisc add dev {nueva_interfaz} root netem delay 100ms 10ms",
+                shell=True
+            )
+        elif nuevo_escenario == "perdida":
+            subprocess.run(
+                f"sudo -n tc qdisc add dev {nueva_interfaz} root netem loss 10% 25%",
+                shell=True
+            )
+        elif nuevo_escenario == "congestion":
+            subprocess.run(
+                f"sudo -n tc qdisc add dev {nueva_interfaz} root tbf rate 10Mbit burst 32kbit latency 400ms",
+                shell=True
+            )
+        # "normal": no aplicar nada (la interfaz anterior ya fue limpiada)
+
+        self.escenario_actual = nuevo_escenario
+        self.interfaz_activa = nueva_interfaz if nuevo_escenario != "normal" else None
+
+        print(f"\n[!] NUEVO ESCENARIO: {nuevo_escenario.upper()} "
+              f"en {nueva_interfaz if nuevo_escenario != 'normal' else 'ninguna'} "
+              f"(durará {self.duracion_escenario} pasos)")
 
     def step(self, action):
         self.pasos_actuales += 1
 
-        # 1. ¿TOCA CAMBIAR EL ESCENARIO?
-        if self.pasos_actuales >= self.proximo_cambio:
-            self._aplicar_congestion_aleatoria()
-            self.pasos_actuales = 0
-            self.proximo_cambio = random.randint(30, 80)
+        # 1. Gestionar escenario (transiciones controladas)
+        self._gestionar_escenario()
 
         # 2. VALIDAR Y ENVIAR ACCIÓN A RYU (síncrono — Session reutiliza la conexión TCP)
         accion_valida = int(action)
@@ -121,8 +199,8 @@ class RedSdnEnv(gym.Env):
 
         # Log de progreso cada 10 pasos para confirmar actividad entre tablas
         if self.pasos_actuales % 10 == 0:
-            faltan = self.proximo_cambio - self.pasos_actuales
-            print(f"  [·] paso {self.pasos_actuales} — siguiente escenario en {faltan} pasos")
+            faltan = self.duracion_escenario - self.pasos_en_escenario
+            print(f"  [·] paso {self.pasos_actuales} — siguiente escenario en {faltan} pasos ({self.escenario_actual})")
 
         # 4. LEER MÉTRICAS DESDE RYU para 6 enlaces clave
         datos = self._get_con_reintento('http://127.0.0.1:8080/ia/metricas')
@@ -207,33 +285,6 @@ class RedSdnEnv(gym.Env):
             recompensa += 0.5   # Eligió correctamente
 
         return self.estado_actual, float(recompensa), False, False, {}
-
-    def _aplicar_congestion_aleatoria(self):
-        """
-        Generador de Caos: inyecta escenarios de red usando tc (Traffic Control de Linux).
-        Cubre los 4 escenarios: normal, latencia, pérdida y congestión.
-        """
-        enlaces = [
-            "s3-eth3", "s3-eth4",
-            "s4-eth3", "s4-eth4",
-            "s5-eth3", "s5-eth4"
-        ]
-        for iface in enlaces:
-            subprocess.run(f"sudo -n tc qdisc del dev {iface} root", shell=True,
-                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-
-        escenario = random.choice(["normal", "latencia", "perdida", "congestion"])
-        ruta_afectada = random.choice(enlaces)
-
-        print(f"\n[!] ---> CAMBIO DE ESCENARIO: {escenario.upper()} en {ruta_afectada} <---")
-
-        if escenario == "latencia":
-            subprocess.run(f"sudo -n tc qdisc add dev {ruta_afectada} root netem delay 100ms", shell=True)
-        elif escenario == "perdida":
-            subprocess.run(f"sudo -n tc qdisc add dev {ruta_afectada} root netem loss 10%", shell=True)
-        elif escenario == "congestion":
-            subprocess.run(f"sudo -n tc qdisc add dev {ruta_afectada} root tbf rate 10Mbit burst 32kbit latency 400ms", shell=True)
-        # "normal": sin reglas, red limpia
 
 
 if __name__ == "__main__":
