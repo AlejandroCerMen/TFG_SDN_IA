@@ -15,3 +15,7 @@ __pycache__/
 # Logs de TensorBoard
 logs_tfg/
 events.out.tfe*
+
+# Archivos de configuración local (solo para ambiente local de desarrollo)
+AGENTS.md
+CONTEXTO_TFG.md

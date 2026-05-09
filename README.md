@@ -5,9 +5,42 @@
 [![Ryu SDN](https://img.shields.io/badge/Ryu-SDN%20Controller-orange.svg)](https://ryu.readthedocs.io/en/latest/)
 [![Stable Baselines3](https://img.shields.io/badge/RL-Stable%20Baselines3-purple.svg)](https://stable-baselines3.readthedocs.io/)
 
-Este repositorio contiene el código fuente desarrollado para el **Trabajo de Fin de Grado (TFG)** centrado en la optimización del tráfico de red en arquitecturas de Data Center (Spine-Leaf) mediante el uso de Inteligencia Artificial y Redes Definidas por Software (SDN).
+Este repositorio contiene el código fuente desarrollado para el **Trabajo de Fin de Grado (TFG)** que propone el diseño e implementación de una plataforma experimental para evaluar un sistema de **enrutamiento inteligente basado en aprendizaje automático** en el contexto de las **Redes Definidas por Software (SDN)**.
 
-## 🎯 Objetivo del Proyecto
+## 📋 Descripción del Proyecto
+
+Este TFG parte de la creación de una **red simulada** en la que el tráfico no se encamina únicamente mediante algoritmos clásicos (como el camino más corto), sino a través de un **modelo de aprendizaje automático** capaz de tomar decisiones dinámicas en función del estado real de la red. El sistema tiene en cuenta variables como:
+* Latencia
+* Pérdida de paquetes
+* Ancho de banda disponible
+* Congestión de enlaces
+* Carga de los enlaces
+* Tipo de tráfico transmitido
+
+## 🔴 Problema Abordado
+
+Los mecanismos tradicionales de routing presentan limitaciones importantes, ya que suelen basarse en métricas estáticas o poco adaptativas. Aunque seleccionar siempre la ruta más corta puede resultar eficiente en ciertos escenarios, **no garantiza el mejor rendimiento** cuando existen:
+* Enlaces congestionados
+* Alta latencia
+* Pérdida de paquetes significativa
+
+En este contexto, las técnicas de **Inteligencia Artificial** permiten analizar el estado de la red en tiempo real o en intervalos periódicos, seleccionando rutas más adecuadas para cada situación. Esto potencialmente mejora la **calidad del servicio (QoS)** y el **aprovechamiento de los recursos disponibles**.
+
+## 🎯 Objetivo Principal
+
+El objetivo principal es **comparar el comportamiento de un sistema de routing clásico frente a un sistema de routing inteligente basado en aprendizaje automático**. Para ello, el proyecto:
+
+1. **Diseña distintos escenarios de prueba** con condiciones variables de tráfico y congestión
+2. **Mide indicadores clave:**
+   * Latencia media
+   * Pérdida de paquetes
+   * Rendimiento (throughput)
+   * Estabilidad
+   * Utilización de enlaces
+3. **Determina si** la incorporación de IA en el enrutamiento mejora el rendimiento de una red SDN
+4. **Identifica bajo qué condiciones** resulta más beneficiosa la inteligencia artificial
+
+## 🏗️ Arquitectura de la Solución
 
 El sistema diseñado propone una **Arquitectura de Enrutamiento Híbrido**:
 1. **Fase Reactiva (Ryu):** Garantiza la conectividad inmediata sin pérdida de paquetes iniciales enrutando el tráfico por rutas por defecto (Spine 1).
@@ -26,8 +59,9 @@ Todos los flujos deben cumplir requisitos QoS mínimos:
 * **UDP Vídeo:** h3 → h6 (20 Mbps), BW > 15Mbps, pérdida < 3%
 * **UDP VoIP:** h5 → h2 (100 Kbps), latencia < 200ms, pérdida < 5%
 
-## ⚙️ Estructura del Proyecto
+## 📁 Estructura del Proyecto
 
+### Archivos principales
 * `arrancar_ryu.py`: Lanza Ryu con parches de compatibilidad (no ejecutar ryu directamente)
 * `ryu_app.py`: Aplicación Ryu con enrutamiento híbrido, telemetría y API REST (`/ia/ruta_dinamica`, `/ia/metricas`)
 * `topologia.py`: Topología Spine-Leaf y lanzamiento de tráfico automatizado
@@ -35,8 +69,6 @@ Todos los flujos deben cumplir requisitos QoS mínimos:
 * `entrenar_ia.py`: Entrenamiento con PPO + VecNormalize (salida: `ia_sdn_optimizada.zip`, `ia_sdn_normalizer.pkl`)
 * `evaluar_ia.py`: Evaluación comparativa (requiere Ryu + Mininet ejecutándose)
 * `ejecutar_ia.py`: Despliegue en producción del modelo entrenado
-* `CONTEXTO_TFG.md`: Especificaciones completas del proyecto
-* `AGENTS.md`: Instrucciones para agentes de IA (orden de ejecución, restricciones)
 
 ## 🚀 Ejecución (Orden Estricto)
 
@@ -68,9 +100,3 @@ Protege todos los flujos con penalizaciones de -2.0 si incumplen QoS mínimos, c
 * TCP: 50% BW, 25% latencia, 25% pérdida
 * Vídeo: 30% BW, 35% latencia, 35% pérdida
 * VoIP: 10% BW, 45% latencia, 45% pérdida
-
-## ⚠️ Restricciones
-* No modificar la topología Spine-Leaf
-* Mantener algoritmo PPO (no aprendizaje supervisado)
-* Comentarios en español
-* Archivos de modelo/resultados gitignored (`.zip`, `.pkl`, `.csv`, `.png`)
