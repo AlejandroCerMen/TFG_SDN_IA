@@ -102,14 +102,21 @@ class RedSdnEnv(gym.Env):
 
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
+
+        # Limpiar reglas tc de interfaces previas (fix 1)
+        for iface in ["s3-eth3", "s3-eth4", "s4-eth3", "s4-eth4", "s5-eth3", "s5-eth4"]:
+            subprocess.run(f"sudo -n tc qdisc del dev {iface} root",
+                           shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        self.interfaz_activa = None  # Asegurar que no hay interfaz activa
+
         # Estado inicial coherente con Ryu (lat=0.1ms, loss=0%, bw=1000Mbps)
         self.estado_actual = np.array([0.1, 0.0, 1000.0] * 6, dtype=np.float32)
         
         # Reiniciar variables de escenario
         self.escenario_actual = "normal"
-        self.interfaz_activa = None
         self.pasos_en_escenario = 0
         self.duracion_escenario = random.randint(80, 150)
+        self.pasos_actuales = 0  # Fix 4: resetear contador de pasos
         
         return self.estado_actual, {}
 
@@ -176,6 +183,9 @@ class RedSdnEnv(gym.Env):
 
     def step(self, action):
         self.pasos_actuales += 1
+
+        # Límite de episodio para evitar episodios infinitos (fix 5)
+        done = self.pasos_actuales >= 1000
 
         # 1. Gestionar escenario (transiciones controladas)
         self._gestionar_escenario()
@@ -258,34 +268,46 @@ class RedSdnEnv(gym.Env):
 
         # Penalización por flujo insuficiente: si algún flujo está por debajo de umbral crítico
         # Umbrales mínimos: TCP bw>100Mbps, Video bw>15Mbps, VoIP lat<200ms y loss<5%
-        penalty_tcp = -2.0 if (bw_tcp < 100.0 or loss_tcp > 5.0) else 0.0
-        penalty_video = -2.0 if (bw_video < 15.0 or loss_video > 3.0) else 0.0
-        penalty_voip = -2.0 if (lat_voip > 200.0 or loss_voip > 5.0) else 0.0
+        # Escalado a -0.5 para evitar varianza excesiva (fix 2)
+        penalty_tcp = -0.5 if (bw_tcp < 100.0 or loss_tcp > 5.0) else 0.0
+        penalty_video = -0.5 if (bw_video < 15.0 or loss_video > 3.0) else 0.0
+        penalty_voip = -0.5 if (lat_voip > 200.0 or loss_voip > 5.0) else 0.0
 
         # Recompensa base: combinación ponderada (fuerza a todos los flujos estar bien)
         recompensa_base = (0.4 * recompensa_tcp + 0.3 * recompensa_video + 0.3 * recompensa_voip)
         recompensa = recompensa_base + penalty_tcp + penalty_video + penalty_voip
 
-        # Bonus por elección de ruta: comparar latencia máxima con alternativas
-        lat_elegida_max = max(lat_tcp, lat_video, lat_voip)
-        mejor_otra_max = float('inf')
+        # Bonus por elección de ruta: comparar métrica combinada (latencia + pérdida) con alternativas
+        bad_elegida = max(
+            lat_tcp / 100.0 + loss_tcp / 10.0,
+            lat_video / 100.0 + loss_video / 10.0,
+            lat_voip / 100.0 + loss_voip / 10.0
+        )
+        mejor_otra_bad = float('inf')
         for a in self.ruta_enlaces_tcp.keys():
             if a != accion_int:
                 r_tcp = self.ruta_enlaces_tcp[a]
                 r_video = self.ruta_enlaces_video[a]
                 r_voip = self.ruta_enlaces_voip[a]
                 lat_tcp_otra = np.mean([self.estado_actual[idx * 3 + 0] for idx in r_tcp])
+                loss_tcp_otra = np.mean([self.estado_actual[idx * 3 + 1] for idx in r_tcp])
                 lat_video_otra = np.mean([self.estado_actual[idx * 3 + 0] for idx in r_video])
+                loss_video_otra = np.mean([self.estado_actual[idx * 3 + 1] for idx in r_video])
                 lat_voip_otra = np.mean([self.estado_actual[idx * 3 + 0] for idx in r_voip])
-                lat_max_otra = max(lat_tcp_otra, lat_video_otra, lat_voip_otra)
-                mejor_otra_max = min(mejor_otra_max, lat_max_otra)
+                loss_voip_otra = np.mean([self.estado_actual[idx * 3 + 1] for idx in r_voip])
+                bad_otra = max(
+                    lat_tcp_otra / 100.0 + loss_tcp_otra / 10.0,
+                    lat_video_otra / 100.0 + loss_video_otra / 10.0,
+                    lat_voip_otra / 100.0 + loss_voip_otra / 10.0
+                )
+                mejor_otra_bad = min(mejor_otra_bad, bad_otra)
 
-        if lat_elegida_max < mejor_otra_max:
+        if bad_elegida < mejor_otra_bad:
             recompensa += 0.3   # Mejor que todas las alternativas
-        elif lat_elegida_max == mejor_otra_max:
-            recompensa += 0.1   # Igual de buena
+        elif abs(bad_elegida - mejor_otra_bad) < 0.01:  # Igual de buena (tolerancia floats)
+            recompensa += 0.1
 
-        return self.estado_actual, float(recompensa), False, False, {}
+        return self.estado_actual, float(recompensa), done, False, {}
 
 
 if __name__ == "__main__":

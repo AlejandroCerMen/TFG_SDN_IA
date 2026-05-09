@@ -1,20 +1,21 @@
 """
 evaluar_ia.py — Script de evaluación y comparativa para el TFG.
 
-MEJORAS v2:
-  - Semilla fija (SEED) para reproducibilidad total.
-  - Secuencia de escenarios PRE-GENERADA una sola vez y compartida por TODAS
-    las políticas → comparación justa, cada política vive en el mismo mundo.
-  - PASOS_EVALUACION aumentado a 500 para mayor significancia estadística.
-  - Múltiples ejecuciones (N_RUNS) con semillas distintas + intervalo de
-    confianza en las gráficas de barras.
+Propósito: Comparar 6 políticas (IA vs baselines) bajo las MISMAS condiciones de red.
+Metodología: Semilla fija + secuencia compartida → comparación justa (same world).
 
-Ejecutar DESPUÉS del entrenamiento:
-    python evaluar_ia.py
+Configuración:
+  • N_RUNS=3: Repeticiones con semillas distintas (permite intervalo de confianza)
+  • PASOS_EVALUACION=2000: Pasos por política (mayor significancia estadística)
+  • Secuencia pre-generada una sola vez y compartida por todas las políticas
 
-Genera:
-    resultados_evaluacion.csv   — datos brutos de cada paso
-    graficas_tfg.png            — gráficas comparativas listas para la memoria
+Uso:
+  1. Asegurar que Ryu + Mininet están ejecutándose
+  2. python evaluar_ia.py
+  
+Salida:
+  • resultados_evaluacion.csv — Datos brutos (paso, acción, métrica, recompensa)
+  • graficas_tfg.png — 5 subgráficas: latencia, pérdida, BW, recompensa (evolución + total)
 """
 
 import time
@@ -30,54 +31,54 @@ from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 from controlador_ia import RedSdnEnv
 
-# ─────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────────────────────
 # CONFIGURACIÓN
-# ─────────────────────────────────────────────
-SEED             = 42          # Semilla maestra para reproducibilidad
-PASOS_EVALUACION = 2000         # Pasos por política (más → más significativo)
-N_RUNS           = 3           # Repeticiones con semillas distintas para IC
-FICHERO_CSV       = "resultados_evaluacion.csv"
-FICHERO_GRAFICAS  = "graficas_tfg.png"
-FICHERO_GRAFICAS_FLUJOS = "graficas_flujos.png"
+# ─────────────────────────────────────────────────────────────────────────────
+SEED             = 42          # Semilla maestra para reproducibilidad total
+PASOS_EVALUACION = 2000        # Pasos por política × N_RUNS
+N_RUNS           = 3           # Repeticiones (genera intervalo de confianza)
+FICHERO_CSV      = "resultados_evaluacion.csv"
+FICHERO_GRAFICAS = "graficas_tfg.png"
 
 session = requests.Session()
 
-# ─────────────────────────────────────────────
-# CONSTANTES DE TOPOLOGÍA / RUTAS
-# ─────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────────────────────
+# TOPOLOGÍA Y RUTAS
+# ─────────────────────────────────────────────────────────────────────────────
+# 6 interfaces Spine-Leaf (donde tc inyecta escenarios):
+#   s3-eth3, s3-eth4 ← Leaf3 conecta a Spine1, Spine2
+#   s4-eth3, s4-eth4 ← Leaf4 conecta a Spine1, Spine2
+#   s5-eth3, s5-eth4 ← Leaf5 conecta a Spine1, Spine2
 INTERFACES_EVAL = [
     "s3-eth3", "s3-eth4",
     "s4-eth3", "s4-eth4",
     "s5-eth3", "s5-eth4",
 ]
-# Rutas para TCP (h1->h4), Video (h3->h6) y VoIP (h5->h2) por acción
+
+# Mapeo: acción → lista de enlaces para cada flujo
+# Acción 0: TCP via s1, Video via s1, VoIP via s1  
+# Acción 1: TCP via s1, Video via s2, VoIP via s1
+# Acción 2: TCP via s2, Video via s1, VoIP via s2
+# Acción 3: TCP via s2, Video via s2, VoIP via s2
 RUTA_ENLACES_TCP = {
-    0: [0, 2],
-    1: [0, 2],
-    2: [1, 3],
-    3: [1, 3],
+    0: [0, 2],  # s3→s1→s4
+    1: [0, 2],  # s3→s1→s4
+    2: [1, 3],  # s3→s2→s4
+    3: [1, 3],  # s3→s2→s4
 }
 RUTA_ENLACES_VIDEO = {
-    0: [2, 4],
-    1: [3, 5],
-    2: [2, 4],
-    3: [3, 5],
+    0: [2, 4],  # s4→s1→s5
+    1: [3, 5],  # s4→s2→s5
+    2: [2, 4],  # s4→s1→s5
+    3: [3, 5],  # s4→s2→s5
 }
 RUTA_ENLACES_VOIP = {
-    0: [4, 0],
-    1: [4, 0],
-    2: [5, 1],
-    3: [5, 1],
+    0: [4, 0],  # s5→s1→s3
+    1: [4, 0],  # s5→s1→s3
+    2: [5, 1],  # s5→s2→s3
+    3: [5, 1],  # s5→s2→s3
 }
 N_RUTAS = 4
-
-# ─────────────────────────────────────────────
-# MAPEO FLUJO → ENLACES (por acción)
-# Cada flujo usa distintos enlaces según la ruta elegida:
-# - TCP (h1→h4): s3 → (s1/s2) → s4
-# - Video UDP (h3→h6): s4 → (s1/s2) → s5
-# - VoIP UDP (h5→h2): s5 → (s1/s2) → s3
-# ─────────────────────────────────────────────
 FLUJO_ENLACES = {
     'tcp': {
         0: [0, 2],   # h1→h4 via s1: s3-eth3 + s4-eth3
@@ -99,14 +100,24 @@ FLUJO_ENLACES = {
     },
 }
 
-# ─────────────────────────────────────────────
-# GENERADOR DE ESCENARIOS (semilla fija)
-# ─────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────────────────────
+# GENERADOR DE ESCENARIOS CON SEMILLA FIJA
+# ─────────────────────────────────────────────────────────────────────────────
+# Propósito: Pre-generar UNA ÚNICA secuencia de escenarios que se usa para
+# TODAS las políticas en el mismo RUN. Esto garantiza comparación justa.
 
 def generar_secuencia_escenarios(n_pasos, seed):
     """
-    Pre-genera la lista completa de eventos de cambio de escenario.
-    Devuelve una lista de (paso_del_cambio, escenario, interfaz).
+    Genera la secuencia de eventos de cambio de escenario una sola vez.
+    Todos las políticas vivirán exactamente los mismos cambios en el mismo orden.
+    
+    Parámetros:
+      n_pasos: número total de pasos en la evaluación
+      seed: semilla para reproducibilidad (SEED+run_number)
+    
+    Retorna:
+      Lista de tuplas (paso_cambio, escenario, interfaz)
+      Ejemplo: [(0, 'latencia', 's3-eth3'), (50, 'perdida', 's4-eth4'), ...]
     """
     rng = random.Random(seed)
     secuencia = []
@@ -125,12 +136,22 @@ def generar_secuencia_escenarios(n_pasos, seed):
 # ─────────────────────────────────────────────
 
 def limpiar_tc():
+    """Elimina todas las reglas de traffic control de las 6 interfaces."""
     for interfaz in INTERFACES_EVAL:
         subprocess.run(f"sudo -n tc qdisc del dev {interfaz} root", shell=True,
                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
 def aplicar_escenario(escenario, interfaz):
+    """
+    Inyecta un escenario de red degradado en una interfaz Spine-Leaf específica.
+    
+    Escenarios soportados:
+      • 'latencia':    +100ms (simula enlace intercontinental)
+      • 'perdida':     +10% packet loss (simula congestión o ruido RF)
+      • 'congestion':  -BW a 10Mbps (cuello de botella)
+      • 'normal':      Sin degradación
+    """
     limpiar_tc()
     if escenario == "latencia":
         subprocess.run(f"sudo -n tc qdisc add dev {interfaz} root netem delay 100ms", shell=True)
@@ -138,10 +159,15 @@ def aplicar_escenario(escenario, interfaz):
         subprocess.run(f"sudo -n tc qdisc add dev {interfaz} root netem loss 10%", shell=True)
     elif escenario == "congestion":
         subprocess.run(f"sudo -n tc qdisc add dev {interfaz} root tbf rate 10Mbit burst 32kbit latency 400ms", shell=True)
-    # "normal": sin reglas
 
 
 def leer_metricas():
+    """
+    Lee métricas de los 6 enlaces Spine-Leaf desde la API de Ryu.
+    Retorna array 18D: [lat_1, loss_1, bw_1, lat_2, loss_2, bw_2, ..., lat_6, loss_6, bw_6]
+    
+    Fuente: Ryu telemetry agent ejecutándose cada 50ms en segundo plano
+    """
     try:
         r = session.get('http://127.0.0.1:8080/ia/metricas', timeout=1)
         d = r.json()
@@ -160,6 +186,10 @@ def leer_metricas():
 
 
 def enviar_accion(accion):
+    """
+    Envía la acción (ruta elegida) al controlador Ryu.
+    Ryu instala reglas OpenFlow dinámicas para enrutar los 3 flujos.
+    """
     try:
         session.post('http://127.0.0.1:8080/ia/ruta_dinamica',
                      json={"accion": int(accion)}, timeout=1)

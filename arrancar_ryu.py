@@ -28,5 +28,7 @@ from ryu.cmd import manager
 
 if __name__ == "__main__":
     print("Aplicando parches de compatibilidad (Python 3.10 + Eventlet)...")
+    # Añadimos el nombre del script de la aplicación Ryu a los argumentos
     sys.argv.append('ryu_app.py')
+    # Lanzamos el manager de Ryu que iniciará nuestra aplicación
     sys.exit(manager.main())
