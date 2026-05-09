@@ -1,4 +1,4 @@
-# 🧠 SDN-AI: Enrutamiento Inteligente en Data Centers usando Aprendizaje por Refuerzo
+# 🧠 SDN-AI: Diseño e implementación de un sistema de enrutamiento inteligente basado en aprendizaje automático para redes definidas por software
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![Mininet](https://img.shields.io/badge/Mininet-2.3.0-green.svg)](http://mininet.org/)
